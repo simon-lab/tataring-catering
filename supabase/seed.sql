@@ -408,8 +408,8 @@ Salah satu kebingungan terbesar saat merencanakan event adalah: berapa porsi yan
 INSERT INTO availability (date, max_slots, booked_slots, is_blocked, block_reason) VALUES
   -- Tanggal hampir penuh
   (CURRENT_DATE + 7,  3, 2, false, NULL),
-  (CURRENT_DATE + 14, 3, 2, NULL,  NULL),
-  (CURRENT_DATE + 21, 3, 2, NULL,  NULL),
+  (CURRENT_DATE + 14, 3, 2, false, NULL),
+  (CURRENT_DATE + 21, 3, 2, false, NULL),
   -- Tanggal fully booked
   (CURRENT_DATE + 8,  3, 3, false, NULL),
   (CURRENT_DATE + 15, 3, 3, false, NULL),
