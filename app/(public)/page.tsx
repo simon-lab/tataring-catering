@@ -30,7 +30,7 @@ async function getFeaturedPackages(): Promise<Package[]> {
       .eq("is_active", true)
       .order("badge", { ascending: true, nullsFirst: false })
       .limit(4);
-    return data ?? [];
+    return (data ?? []) as Package[];
   } catch {
     return [];
   }
@@ -44,7 +44,7 @@ async function getMenuStories(): Promise<MenuStory[]> {
       .select("*")
       .eq("is_published", true)
       .limit(3);
-    return data ?? [];
+    return (data ?? []) as MenuStory[];
   } catch {
     return [];
   }
@@ -59,7 +59,7 @@ async function getTestimonials(): Promise<Testimonial[]> {
       .eq("is_published", true)
       .order("created_at", { ascending: false })
       .limit(6);
-    return data ?? [];
+    return (data ?? []) as Testimonial[];
   } catch {
     return [];
   }
