@@ -20,17 +20,26 @@ Di dashboard Supabase → **Settings → API**:
 
 Copy ke file `.env.local` di root project.
 
-## Langkah 3 — Jalankan Migration
+## Langkah 3 — Jalankan Migration (urutan penting!)
+
+### 001 — Schema awal
+Jalankan `supabase/migrations/001_initial_schema.sql`
+
+### 002 — Tambah kolom variants
+Jalankan `supabase/migrations/002_add_variants.sql`
+
+---
+
+## Langkah 3b — (sudah diganti judul aslinya)
 
 1. Di Supabase dashboard → **SQL Editor → New query**
 2. Copy-paste isi file `supabase/migrations/001_initial_schema.sql`
 3. Klik **Run** — pastikan tidak ada error
 
-## Langkah 4 — Jalankan Seed Data
+## Langkah 4 — Jalankan Seed Data (urutan penting!)
 
-1. SQL Editor → New query
-2. Copy-paste isi file `supabase/seed.sql`
-3. Klik **Run**
+1. SQL Editor → New query → copy-paste `supabase/seed.sql` → **Run**
+2. SQL Editor → New query → copy-paste `supabase/seed_variants.sql` → **Run**
 
 ## Langkah 5 — Buat Admin User
 

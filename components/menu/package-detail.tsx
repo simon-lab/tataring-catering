@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Users, Calculator } from "lucide-react";
+import { Users, Calculator, Flame } from "lucide-react";
 import { formatRupiah, cn } from "@/lib/utils";
 import { WHATSAPP_NUMBER } from "@/lib/constants";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
-import type { Package, Addon } from "@/types/database";
+import type { Package, Addon, PackageVariant } from "@/types/database";
 
 const PORTION_PRESETS = [20, 50, 100, 200, 500];
 
@@ -16,25 +16,37 @@ export function PackageDetail({
   pkg: Package;
   addons: Addon[];
 }) {
+  const variants = (pkg.variants as PackageVariant[] | null) ?? [];
+  const defaultVariant = variants.find((v) => v.is_popular) ?? variants[0] ?? null;
+
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
+    defaultVariant?.id ?? null
+  );
   const [portion, setPortion] = useState(pkg.min_portion);
   const [customPortion, setCustomPortion] = useState("");
   const [useCustom, setUseCustom] = useState(false);
   const [selectedAddons, setSelectedAddons] = useState<Set<string>>(new Set());
   const [guestCount, setGuestCount] = useState("");
 
+  const activeVariant = variants.find((v) => v.id === selectedVariantId) ?? defaultVariant;
+  const pricePerPortion = activeVariant?.price_per_portion ?? pkg.price_per_portion;
+  const contents =
+    activeVariant?.contents ??
+    (pkg.contents as string[] | null) ??
+    [];
+
   const activePortion = useCustom
     ? Math.max(pkg.min_portion, Math.min(parseInt(customPortion) || pkg.min_portion, pkg.max_portion))
     : portion;
 
   const selectedAddonItems = addons.filter((a) => selectedAddons.has(a.id));
-  const addonTotal = selectedAddonItems.reduce((sum, a) => sum + a.price * activePortion, 0);
-  const baseTotal = activePortion * pkg.price_per_portion;
+  const addonTotal = selectedAddonItems.reduce((s, a) => s + a.price * activePortion, 0);
+  const baseTotal = activePortion * pricePerPortion;
   const grandTotal = baseTotal + addonTotal;
 
   const suggestedPortion = useMemo(() => {
     const n = parseInt(guestCount);
-    if (!n || n <= 0) return null;
-    return Math.ceil(n * 1.1);
+    return n > 0 ? Math.ceil(n * 1.1) : null;
   }, [guestCount]);
 
   const validPresets = PORTION_PRESETS.filter(
@@ -50,36 +62,89 @@ export function PackageDetail({
   };
 
   const handleOrder = () => {
-    const addonNames =
-      selectedAddonItems.length > 0
-        ? selectedAddonItems.map((a) => a.name).join(", ")
-        : "-";
+    const variantLabel = activeVariant ? ` — ${activeVariant.name}` : "";
+    const addonNames = selectedAddonItems.length > 0
+      ? selectedAddonItems.map((a) => a.name).join(", ")
+      : "-";
 
     const message = `Halo TATARING CATERING, saya tertarik dengan:
 
-Paket: ${pkg.name}
+Paket: ${pkg.name}${variantLabel}
 Porsi: ${activePortion} porsi
 Add-on: ${addonNames}
 
 Estimasi Total: ${formatRupiah(grandTotal)}
 
-Mohon info lebih lanjut ya. Terima kasih! Horas!`;
+Mohon info lebih lanjut ya. Mauliate! Horas!`;
 
     window.open(buildWhatsAppUrl(message, WHATSAPP_NUMBER), "_blank");
   };
 
-  const contents = (pkg.contents as string[] | null) ?? [];
-
   return (
     <div className="space-y-8">
-      {/* Isi paket */}
+
+      {/* ── Variant selector ── */}
+      {variants.length > 0 && (
+        <div>
+          <h3 className="font-semibold text-foreground mb-3">Pilih Paket</h3>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {variants.map((v) => {
+              const isActive = selectedVariantId === v.id;
+              return (
+                <button
+                  key={v.id}
+                  onClick={() => setSelectedVariantId(v.id)}
+                  className={cn(
+                    "relative rounded-xl border p-4 text-left transition-all",
+                    isActive
+                      ? "border-primary bg-primary/5 shadow-sm"
+                      : "border-border hover:border-primary/40 hover:bg-muted/30"
+                  )}
+                >
+                  {v.is_popular && (
+                    <span className="absolute -top-2.5 left-3 inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-secondary-foreground">
+                      <Flame className="size-2.5" />
+                      Terpopuler
+                    </span>
+                  )}
+                  <p className={cn(
+                    "font-heading text-base",
+                    isActive ? "text-primary" : "text-foreground"
+                  )}>
+                    {v.name}
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
+                    {v.tagline}
+                  </p>
+                  <p className={cn(
+                    "mt-2 text-sm font-bold",
+                    isActive ? "text-primary" : "text-foreground"
+                  )}>
+                    {formatRupiah(v.price_per_portion)}
+                    <span className="font-normal text-muted-foreground">/porsi</span>
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Isi paket ── */}
       {contents.length > 0 && (
         <div>
-          <h3 className="font-semibold text-foreground mb-3">Isi Paket</h3>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+          <h3 className="font-semibold text-foreground mb-3">
+            Isi Paket
+            {activeVariant && (
+              <span className="ml-2 text-sm font-normal text-muted-foreground">
+                ({activeVariant.name})
+              </span>
+            )}
+          </h3>
+          <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
             {contents.map((item, i) => (
               <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
-                <span className="mt-1 size-1.5 shrink-0 rounded-full bg-primary" />
+                <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />
                 {item}
               </li>
             ))}
@@ -87,7 +152,7 @@ Mohon info lebih lanjut ya. Terima kasih! Horas!`;
         </div>
       )}
 
-      {/* Pilih porsi */}
+      {/* ── Pilih porsi ── */}
       <div>
         <h3 className="font-semibold text-foreground mb-3">
           Pilih Jumlah Porsi
@@ -122,7 +187,6 @@ Mohon info lebih lanjut ya. Terima kasih! Horas!`;
             Custom
           </button>
         </div>
-
         {useCustom && (
           <input
             type="number"
@@ -136,13 +200,13 @@ Mohon info lebih lanjut ya. Terima kasih! Horas!`;
         )}
       </div>
 
-      {/* Kalkulator porsi */}
+      {/* ── Kalkulator porsi ── */}
       <div className="rounded-xl border border-border bg-muted/40 p-4">
         <div className="flex items-center gap-2 mb-3">
           <Calculator className="size-4 text-primary" />
-          <h3 className="font-semibold text-sm text-foreground">Kalkulator Porsi</h3>
+          <h3 className="text-sm font-semibold text-foreground">Kalkulator Porsi</h3>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="relative">
             <Users className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <input
@@ -168,10 +232,10 @@ Mohon info lebih lanjut ya. Terima kasih! Horas!`;
               >
                 {suggestedPortion} porsi
               </button>
-              <span className="text-muted-foreground text-xs ml-1">(+10% buffer)</span>
+              <span className="ml-1 text-xs text-muted-foreground">(+10% buffer)</span>
               {suggestedPortion > pkg.max_portion && (
-                <p className="text-xs text-destructive mt-1">
-                  Melebihi kapasitas maks. hubungi kami untuk custom.
+                <p className="mt-1 text-xs text-destructive">
+                  Melebihi kapasitas maks. Hubungi kami untuk paket custom.
                 </p>
               )}
             </div>
@@ -179,7 +243,7 @@ Mohon info lebih lanjut ya. Terima kasih! Horas!`;
         </div>
       </div>
 
-      {/* Add-on */}
+      {/* ── Add-on ── */}
       {addons.length > 0 && (
         <div>
           <h3 className="font-semibold text-foreground mb-3">Add-on</h3>
@@ -201,7 +265,7 @@ Mohon info lebih lanjut ya. Terima kasih! Horas!`;
                     <p className="text-xs text-muted-foreground mt-0.5">{addon.description}</p>
                   )}
                 </div>
-                <p className="text-sm font-semibold text-primary shrink-0">
+                <p className="shrink-0 text-sm font-semibold text-primary">
                   +{formatRupiah(addon.price)}/porsi
                 </p>
               </label>
@@ -210,10 +274,15 @@ Mohon info lebih lanjut ya. Terima kasih! Horas!`;
         </div>
       )}
 
-      {/* Price summary */}
+      {/* ── Price summary ── */}
       <div className="rounded-xl border border-border bg-card p-5 space-y-3">
         <div className="flex justify-between text-sm text-muted-foreground">
-          <span>{activePortion} porsi × {formatRupiah(pkg.price_per_portion)}</span>
+          <span>
+            {activePortion} porsi × {formatRupiah(pricePerPortion)}
+            {activeVariant && (
+              <span className="ml-1 text-xs">({activeVariant.name})</span>
+            )}
+          </span>
           <span>{formatRupiah(baseTotal)}</span>
         </div>
         {selectedAddonItems.map((a) => (
@@ -222,16 +291,16 @@ Mohon info lebih lanjut ya. Terima kasih! Horas!`;
             <span>+{formatRupiah(a.price * activePortion)}</span>
           </div>
         ))}
-        <div className="border-t border-border pt-3 flex justify-between items-baseline">
+        <div className="flex items-baseline justify-between border-t border-border pt-3">
           <span className="text-sm font-medium text-foreground">Estimasi Total</span>
           <span className="font-heading text-2xl text-primary">{formatRupiah(grandTotal)}</span>
         </div>
         <p className="text-xs text-muted-foreground">
-          Harga estimasi. Konfirmasi final via WhatsApp.
+          Harga estimasi. Konfirmasi final via WhatsApp bersama admin kami.
         </p>
       </div>
 
-      {/* CTA */}
+      {/* ── CTA ── */}
       <button
         onClick={handleOrder}
         className="w-full rounded-xl py-4 text-base font-semibold text-white transition-opacity hover:opacity-90"

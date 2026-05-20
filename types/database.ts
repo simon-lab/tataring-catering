@@ -1,5 +1,14 @@
 export type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
 
+export interface PackageVariant {
+  id: string;
+  name: string;
+  tagline: string;
+  price_per_portion: number;
+  contents: string[];
+  is_popular?: boolean;
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -14,6 +23,7 @@ export type Database = {
           min_portion: number;
           max_portion: number;
           contents: Json | null;
+          variants: Json | null;
           images: string[] | null;
           badge: string | null;
           is_active: boolean;
