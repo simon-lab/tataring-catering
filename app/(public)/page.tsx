@@ -2,10 +2,8 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/constants";
 import { Hero } from "@/components/home/hero";
-import { StatsBar } from "@/components/home/stats-bar";
 import { FeaturedPackages } from "@/components/home/featured-packages";
 import { MenuStoriesPreview } from "@/components/home/menu-stories-preview";
-import { InstagramFeed } from "@/components/home/instagram-feed";
 import { TestimonialCarousel } from "@/components/home/testimonial-carousel";
 import { CtaSection } from "@/components/home/cta-section";
 import { SectionWrapper } from "@/components/ui/section-wrapper";
@@ -77,11 +75,9 @@ export default async function HomePage() {
   return (
     <>
       <Hero />
-      <StatsBar />
       <FeaturedPackages packages={packages} />
       <MenuStoriesPreview stories={stories} />
 
-      {/* Testimoni */}
       {testimonials.length > 0 && (
         <SectionWrapper className="bg-muted/30">
           <div className="mb-10 text-center">
@@ -99,7 +95,6 @@ export default async function HomePage() {
         </SectionWrapper>
       )}
 
-      <InstagramFeed />
       <CtaSection />
     </>
   );

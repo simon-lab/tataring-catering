@@ -53,9 +53,10 @@ export function Hero() {
               target="_blank"
               rel="noopener noreferrer"
               className={cn(
-                buttonVariants({ variant: "outline", size: "lg" }),
-                "border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10 hover:border-primary-foreground/60"
+                buttonVariants({ size: "lg" }),
+                "border-0 text-white hover:opacity-90"
               )}
+              style={{ backgroundColor: "#25D366" }}
             >
               Chat di WhatsApp
             </a>
