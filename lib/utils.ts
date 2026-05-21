@@ -30,6 +30,14 @@ export function slugify(text: string): string {
     .trim();
 }
 
+/** Returns YYYY-MM-DD using LOCAL timezone — prevents UTC off-by-one in UTC+X zones. */
+export function toLocalDateStr(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 export function estimateReadTime(text: string): number {
   const wordsPerMinute = 200;
   const words = text.trim().split(/\s+/).length;

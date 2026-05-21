@@ -7,7 +7,7 @@ import { PackageBadge } from "@/components/ui/package-badge";
 import { ImageGallery } from "@/components/menu/image-gallery";
 import { PackageDetail } from "@/components/menu/package-detail";
 import { formatRupiah } from "@/lib/utils";
-import { SITE_NAME } from "@/lib/constants";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import type { Package, Addon } from "@/types/database";
 
 interface PageProps {
@@ -52,8 +52,33 @@ export default async function MenuDetailPage({ params }: PageProps) {
 
   const images = pkg.images ?? [];
 
+  // Schema.org Product JSON-LD
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: pkg.name,
+    description: pkg.description ?? undefined,
+    image: images[0] ?? undefined,
+    url: `${SITE_URL}/menu/${pkg.slug}`,
+    brand: { "@type": "Brand", name: SITE_NAME },
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "IDR",
+      price: pkg.price_per_portion,
+      availability: pkg.is_active
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+      seller: { "@type": "Organization", name: SITE_NAME },
+    },
+  };
+
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       {/* Breadcrumb */}
       <nav className="mb-8 flex items-center gap-1.5 text-sm text-muted-foreground">
         <Link href="/" className="hover:text-primary transition-colors">Beranda</Link>
@@ -111,5 +136,6 @@ export default async function MenuDetailPage({ params }: PageProps) {
         </div>
       </div>
     </div>
+    </>
   );
 }
