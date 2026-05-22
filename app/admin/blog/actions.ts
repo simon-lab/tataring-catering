@@ -37,7 +37,7 @@ export async function createPost(form: BlogFormData): Promise<ActionResult> {
   });
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/blog");
-  revalidatePath("/blog");
+  revalidatePath("/blog", "layout");
   return OK;
 }
 
@@ -62,7 +62,7 @@ export async function updatePost(id: string, form: BlogFormData): Promise<Action
     .eq("id", id);
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/blog");
-  revalidatePath("/blog");
+  revalidatePath("/blog", "layout");
   return OK;
 }
 
@@ -70,7 +70,7 @@ export async function deletePost(id: string): Promise<ActionResult> {
   const { error } = await db().from("blog_posts").delete().eq("id", id);
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/blog");
-  revalidatePath("/blog");
+  revalidatePath("/blog", "layout");
   return OK;
 }
 
@@ -85,6 +85,6 @@ export async function togglePostPublished(id: string, is_published: boolean): Pr
     .eq("id", id);
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/blog");
-  revalidatePath("/blog");
+  revalidatePath("/blog", "layout");
   return OK;
 }

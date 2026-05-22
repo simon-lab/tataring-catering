@@ -11,8 +11,6 @@ import { BLOG_CATEGORIES, SITE_NAME, SITE_URL } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
 import type { BlogPost } from "@/types/database";
 
-export const revalidate = 3600;
-
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
