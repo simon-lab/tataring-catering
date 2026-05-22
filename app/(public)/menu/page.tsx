@@ -8,9 +8,10 @@ import { SITE_NAME } from "@/lib/constants";
 import type { Package } from "@/types/database";
 
 export const metadata: Metadata = {
-  title: `Menu & Paket — ${SITE_NAME}`,
+  title: `Paket Catering Batak Bandung — ${SITE_NAME}`,
   description:
-    "Jelajahi semua paket catering Batak TATARING — dari Pesta Adat, Wedding, Arisan Marga, Birthday, hingga Acara Kantor.",
+    "Pilihan lengkap paket catering Batak di Bandung — Pesta Adat, Wedding Batak, Arisan Marga, Birthday, hingga Acara Kantor. Saksang, Arsik, Na Niura & lebih.",
+  alternates: { canonical: "https://tataring.id/menu" },
 };
 
 interface PageProps {
@@ -51,10 +52,10 @@ export default async function MenuPage({ searchParams }: PageProps) {
             Pilihan Lengkap
           </p>
           <h1 className="mt-2 font-heading text-4xl text-foreground">
-            Menu & Paket Catering
+            Paket Catering Batak Bandung
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Dari pesta adat hingga hangout kantor — ada paket yang pas buat semua acara.
+            Dari pesta adat hingga hangout kantor — ada paket yang pas buat semua acara di Bandung.
           </p>
         </div>
       </div>

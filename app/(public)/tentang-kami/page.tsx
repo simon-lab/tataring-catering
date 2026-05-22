@@ -4,9 +4,9 @@ import { SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
 import { SectionWrapper } from "@/components/ui/section-wrapper";
 
 export const metadata: Metadata = {
-  title: `Tentang Kami — ${SITE_NAME}`,
+  title: `Tentang Kami — Catering Batak Bandung | ${SITE_NAME}`,
   description:
-    "Kenali cerita di balik TATARING CATERING — dari dapur rumahan ke ratusan acara sukses. Kami adalah tim yang bangga membawa cita rasa Batak otentik ke meja pestamu.",
+    "Kenali cerita di balik TATARING CATERING, catering Batak otentik di Bandung — dari dapur rumahan ke ratusan acara sukses. Bangga membawa cita rasa Batak ke meja pestamu.",
 };
 
 const VALUES = [
@@ -58,7 +58,7 @@ export default function TentangKamiPage() {
             Horas! — Kenali Kami
           </p>
           <h1 className="mt-3 font-heading text-5xl text-primary-foreground">
-            Tentang TATARING CATERING
+            Catering Batak Otentik di Bandung
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-primary-foreground/75">{SITE_TAGLINE}</p>
         </div>
@@ -92,9 +92,11 @@ export default function TentangKamiPage() {
                 dan kenangan terbentuk lewat aroma dan rasa.
               </p>
               <p>
-                Kini, dengan ratusan event sukses dan kepercayaan ribuan keluarga, kami terus
-                berkomitmen untuk menghadirkan cita rasa Batak yang otentik di setiap momen
-                spesialmu — dari pesta adat, wedding, hingga hangout kantor.
+                Kini berbasis di <strong className="text-foreground">Bandung</strong>, dengan
+                ratusan event sukses dan kepercayaan ribuan keluarga, kami terus berkomitmen
+                untuk menghadirkan cita rasa Batak yang otentik di setiap momen spesialmu —
+                dari pesta adat, wedding Batak, arisan marga, hingga hangout kantor di seluruh
+                area Bandung dan sekitarnya.
               </p>
             </div>
             <Link

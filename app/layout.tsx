@@ -4,7 +4,12 @@ import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
-import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/constants";
+import {
+  SITE_NAME, SITE_TAGLINE, SITE_URL,
+  SITE_CITY, SITE_PROVINCE, SITE_COUNTRY,
+  SITE_STREET_ADDRESS, SITE_POSTAL_CODE,
+  SITE_GEO_LAT, SITE_GEO_LNG, SITE_PHONE,
+} from "@/lib/constants";
 
 const instrumentSerif = Instrument_Serif({
   variable: "--font-heading",
@@ -49,18 +54,45 @@ export const metadata: Metadata = {
   },
   authors: [{ name: SITE_NAME, url: SITE_URL }],
   keywords: [
+    "catering batak bandung",
     "catering batak",
-    "catering medan",
-    "catering adat batak",
-    "catering wedding batak",
-    "catering arisan",
-    "saksang",
-    "arsik",
+    "catering bandung",
+    "catering adat batak bandung",
+    "catering wedding batak bandung",
+    "catering pernikahan batak bandung",
+    "catering arisan marga bandung",
+    "catering pesta adat bandung",
+    "saksang bandung",
+    "arsik bandung",
+    "masakan batak bandung",
     "tataring catering",
+    "catering batak jawa barat",
   ],
 };
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+
+// Organization JSON-LD — muncul di semua halaman
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: SITE_NAME,
+  url: SITE_URL,
+  logo: `${SITE_URL}/og-default.jpg`,
+  telephone: SITE_PHONE,
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: SITE_STREET_ADDRESS,
+    addressLocality: SITE_CITY,
+    addressRegion: SITE_PROVINCE,
+    postalCode: SITE_POSTAL_CODE,
+    addressCountry: "ID",
+  },
+  sameAs: [
+    "https://instagram.com/tataringcatering",
+    "https://wa.me/" + SITE_PHONE.replace(/\D/g, ""),
+  ],
+};
 
 export default function RootLayout({
   children,
@@ -73,6 +105,10 @@ export default function RootLayout({
       className={`${instrumentSerif.variable} ${plusJakartaSans.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-background text-foreground">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
         {children}
 
         {/* Vercel Analytics + Speed Insights */}

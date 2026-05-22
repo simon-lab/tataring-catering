@@ -27,10 +27,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!pkg) return { title: "Paket tidak ditemukan" };
 
   return {
-    title: `${pkg.name} — ${SITE_NAME}`,
-    description: pkg.description ?? undefined,
+    title: `${pkg.name} — Catering Batak Bandung | ${SITE_NAME}`,
+    description: pkg.description
+      ? `${pkg.description} Tersedia di Bandung.`
+      : `Paket catering Batak ${pkg.name} di Bandung. Hubungi TATARING CATERING untuk pemesanan.`,
+    alternates: { canonical: `${SITE_URL}/menu/${pkg.slug}` },
     openGraph: {
-      title: pkg.name,
+      title: `${pkg.name} — Catering Batak Bandung`,
       description: pkg.description ?? undefined,
       images: pkg.images?.[0] ? [pkg.images[0]] : [],
     },
@@ -51,6 +54,17 @@ export default async function MenuDetailPage({ params }: PageProps) {
   if (!pkg) notFound();
 
   const images = pkg.images ?? [];
+
+  // BreadcrumbList JSON-LD
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Beranda", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Menu", item: `${SITE_URL}/menu` },
+      { "@type": "ListItem", position: 3, name: pkg.name, item: `${SITE_URL}/menu/${pkg.slug}` },
+    ],
+  };
 
   // Schema.org Product JSON-LD
   const productJsonLd = {
@@ -74,6 +88,10 @@ export default async function MenuDetailPage({ params }: PageProps) {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}

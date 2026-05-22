@@ -1,13 +1,31 @@
 import type { Metadata } from "next";
 import { SectionWrapper } from "@/components/ui/section-wrapper";
 import { FaqAccordion } from "@/components/faq/faq-accordion";
-import { SITE_NAME, WHATSAPP_NUMBER } from "@/lib/constants";
+import { FAQ_DATA } from "@/lib/faq-data";
+import { SITE_NAME, SITE_URL, WHATSAPP_NUMBER } from "@/lib/constants";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 
 export const metadata: Metadata = {
-  title: `FAQ — ${SITE_NAME}`,
+  title: `FAQ Catering Batak Bandung — ${SITE_NAME}`,
   description:
-    "Pertanyaan yang sering diajukan seputar pemesanan, pengiriman, menu, dan pembayaran TATARING CATERING. Tidak menemukan jawaban? Chat langsung dengan admin kami.",
+    "Pertanyaan yang sering diajukan seputar pemesanan, pengiriman, menu, dan pembayaran TATARING CATERING Bandung. Tidak menemukan jawaban? Chat langsung dengan admin kami.",
+  alternates: { canonical: `${SITE_URL}/faq` },
+};
+
+// FAQPage JSON-LD — dibangun dari data yang sama dengan accordion
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQ_DATA.flatMap((cat) =>
+    cat.items.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.a,
+      },
+    }))
+  ),
 };
 
 export default function FaqPage() {
@@ -18,6 +36,11 @@ export default function FaqPage() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+
       {/* Page header */}
       <div className="border-b border-border bg-card py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

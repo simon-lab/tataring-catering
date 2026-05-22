@@ -3,6 +3,19 @@ export const SITE_TAGLINE = "Cita Rasa Batak, Buat Setiap Momen Jadi Pesta.";
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tataring.id";
 export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "";
 
+// ─── Lokasi Bisnis ────────────────────────────────────────────────────────────
+// ⚠️  Isi sesuai alamat aktual — dipakai untuk SEO lokal & structured data
+export const SITE_CITY           = "Bandung";
+export const SITE_PROVINCE       = "Jawa Barat";
+export const SITE_COUNTRY        = "Indonesia";
+export const SITE_POSTAL_CODE    = "40000";       // Ganti dengan kode pos aktual
+export const SITE_STREET_ADDRESS = "Jl. [Nama Jalan] No. [Nomor], [Kelurahan], [Kecamatan]"; // Ganti dengan alamat aktual
+export const SITE_GEO_LAT        = -6.9175;       // Ganti dengan koordinat GPS dari Google Maps
+export const SITE_GEO_LNG        = 107.6191;      // Ganti dengan koordinat GPS dari Google Maps
+export const SITE_PHONE          = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER
+  ? `+${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}`
+  : "+6281xxxxxxxxx"; // Fallback — isi nomor bisnis aktual
+
 export const EVENT_TYPES = [
   { value: "pesta_adat", label: "Pesta Adat" },
   { value: "wedding", label: "Wedding Batak" },

@@ -9,13 +9,18 @@ import {
 } from "lucide-react";
 import { SectionWrapper } from "@/components/ui/section-wrapper";
 import { KontakForm } from "@/components/kontak/kontak-form";
-import { SITE_NAME, WHATSAPP_NUMBER } from "@/lib/constants";
+import {
+  SITE_NAME, SITE_URL,
+  SITE_CITY, SITE_PROVINCE, SITE_STREET_ADDRESS,
+  WHATSAPP_NUMBER,
+} from "@/lib/constants";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 
 export const metadata: Metadata = {
   title: `Kontak — ${SITE_NAME}`,
   description:
-    "Hubungi TATARING CATERING via WhatsApp, email, atau kunjungi dapur kami di Medan. Kami siap menjawab setiap pertanyaan tentang catering Batak untuk acaramu.",
+    `Hubungi TATARING CATERING via WhatsApp, email, atau kunjungi dapur kami di ${SITE_CITY}. Kami siap menjawab setiap pertanyaan tentang catering Batak untuk acaramu.`,
+  alternates: { canonical: `${SITE_URL}/kontak` },
 };
 
 const CONTACTS = [
@@ -68,7 +73,7 @@ export default function KontakPage() {
           </p>
           <h1 className="mt-2 font-heading text-4xl text-foreground">Kontak</h1>
           <p className="mt-2 text-muted-foreground">
-            Ada pertanyaan, mau diskusi paket, atau ingin konsultasi acara? Kami siap membantu.
+            Ada pertanyaan, mau diskusi paket, atau ingin konsultasi acara catering Batak di Bandung? Kami siap membantu.
           </p>
         </div>
       </div>
@@ -141,9 +146,9 @@ export default function KontakPage() {
                 Lokasi
               </h2>
               <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-                Jl. [Nama Jalan], No. [Nomor], [Kelurahan], [Kecamatan]
+                {SITE_STREET_ADDRESS}
                 <br />
-                Medan, Sumatera Utara — Indonesia
+                {SITE_CITY}, {SITE_PROVINCE} — Indonesia
               </p>
               {/* Maps embed placeholder */}
               <div className="overflow-hidden rounded-xl border border-border bg-muted aspect-video flex items-center justify-center">
