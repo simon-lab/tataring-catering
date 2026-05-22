@@ -8,6 +8,7 @@ import {
   createPost, updatePost, deletePost, togglePostPublished,
   type BlogFormData,
 } from "@/app/admin/blog/actions";
+import { StoryHeroUploader } from "@/components/admin/story-hero-uploader";
 
 interface BlogPost {
   id: string; title: string; slug: string; category: string;
@@ -121,11 +122,13 @@ export function BlogTable({ posts }: { posts: BlogPost[] }) {
                 placeholder="Nama penulis"
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium">URL Thumbnail</label>
-              <input value={form.thumbnail} onChange={(e) => f("thumbnail", e.target.value)}
-                placeholder="https://..."
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
+            <div className="space-y-1.5 sm:col-span-2">
+              <label className="text-xs font-medium">Thumbnail</label>
+              <StoryHeroUploader
+                value={form.thumbnail}
+                onChange={(url) => f("thumbnail", url)}
+                storagePath="blog"
+              />
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-medium flex justify-between">

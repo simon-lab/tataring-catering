@@ -187,9 +187,10 @@ function CropModal({ src, onConfirm, onCancel }: CropModalProps) {
 interface StoryHeroUploaderProps {
   value: string;
   onChange: (url: string) => void;
+  storagePath?: string;
 }
 
-export function StoryHeroUploader({ value, onChange }: StoryHeroUploaderProps) {
+export function StoryHeroUploader({ value, onChange, storagePath = "cerita-menu" }: StoryHeroUploaderProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -230,7 +231,7 @@ export function StoryHeroUploader({ value, onChange }: StoryHeroUploaderProps) {
     setUploadError(null);
     try {
       const supabase = createClient();
-      const path = `cerita-menu/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
+      const path = `${storagePath}/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
 
       const { error: storageErr } = await supabase.storage
         .from("tataring")
