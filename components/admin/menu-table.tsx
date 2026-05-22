@@ -73,12 +73,13 @@ export function MenuTable({ packages }: { packages: Package[] }) {
     e.preventDefault();
     setFormError(null);
     startTransition(async () => {
-      try {
-        if (editId) await updatePackage(editId, form);
-        else await createPackage(form);
+      const result = editId
+        ? await updatePackage(editId, form)
+        : await createPackage(form);
+      if (result.error) {
+        setFormError(result.error);
+      } else {
         closeForm();
-      } catch (err) {
-        setFormError(err instanceof Error ? err.message : "Terjadi kesalahan, coba lagi.");
       }
     });
   };

@@ -20,6 +20,8 @@ export interface PackageFormData {
   is_active: boolean;
 }
 
+export type ActionResult = { error: string } | { error: null };
+
 function parseContents(raw: string): string[] {
   return raw.split("\n").map((s) => s.trim()).filter(Boolean);
 }
@@ -28,7 +30,7 @@ function parseImages(raw: string): string[] {
   return raw.split(",").map((s) => s.trim()).filter(Boolean);
 }
 
-export async function createPackage(form: PackageFormData) {
+export async function createPackage(form: PackageFormData): Promise<ActionResult> {
   const { error } = await db().from("packages").insert({
     name: form.name,
     slug: slugify(form.name),
@@ -43,12 +45,13 @@ export async function createPackage(form: PackageFormData) {
     is_active: form.is_active,
     updated_at: new Date().toISOString(),
   });
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
   revalidatePath("/admin/menu");
   revalidatePath("/menu");
+  return { error: null };
 }
 
-export async function updatePackage(id: string, form: PackageFormData) {
+export async function updatePackage(id: string, form: PackageFormData): Promise<ActionResult> {
   const { error } = await db()
     .from("packages")
     .update({
@@ -66,9 +69,10 @@ export async function updatePackage(id: string, form: PackageFormData) {
       updated_at: new Date().toISOString(),
     })
     .eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
   revalidatePath("/admin/menu");
   revalidatePath("/menu");
+  return { error: null };
 }
 
 export async function deletePackage(id: string) {
