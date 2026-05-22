@@ -29,7 +29,7 @@ export const PACKAGE_CATEGORIES = [
   { value: "wedding", label: "Wedding Batak" },
   { value: "arisan", label: "Arisan Marga" },
   { value: "perayaan", label: "Perayaan" },
-  { value: "custom", label: "Custom" },
+  { value: "custom", label: "Lainnya" },
 ] as const;
 
 export const BLOG_CATEGORIES = [

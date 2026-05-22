@@ -8,6 +8,7 @@ import {
   createTestimoni, updateTestimoni, deleteTestimoni, toggleTestimoniPublished,
   type TestimoniFormData,
 } from "@/app/admin/testimoni/actions";
+import { TestimoniPhotoUploader } from "@/components/admin/testimoni-photo-uploader";
 
 interface Testimoni {
   id: string; customer_name: string; customer_photo: string | null;
@@ -115,10 +116,11 @@ export function TestimoniTable({ testimonials }: { testimonials: Testimoni[] }) 
               </select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium">URL Foto (opsional)</label>
-              <input value={form.customer_photo} onChange={(e) => f("customer_photo", e.target.value)}
-                placeholder="https://..."
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
+              <label className="text-xs font-medium">Foto Customer (opsional)</label>
+              <TestimoniPhotoUploader
+                value={form.customer_photo}
+                onChange={(url) => f("customer_photo", url)}
+              />
             </div>
             <div className="space-y-1.5 sm:col-span-2">
               <label className="text-xs font-medium">Ulasan *</label>
