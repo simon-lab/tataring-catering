@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Phone, Mail, Clock, MapPin } from "lucide-react";
-import { SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
+import { SITE_NAME, SITE_TAGLINE, SITE_STREET_ADDRESS, SITE_PROVINCE, SITE_POSTAL_CODE } from "@/lib/constants";
 
 function IconInstagram({ className }: { className?: string }) {
   return (
@@ -89,31 +89,31 @@ export function Footer() {
             <ul className="space-y-3">
               <li>
                 <a
-                  href="https://wa.me/628123456789"
+                  href="https://wa.me/6288295218888"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-start gap-2.5 text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
                   <Phone className="mt-0.5 size-4 shrink-0 text-primary" />
-                  +62 812-3456-789
+                  0882-9521-8888
                 </a>
               </li>
               <li>
                 <a
-                  href="mailto:halo@tataring.id"
+                  href="mailto:hello@tataring.id"
                   className="flex items-start gap-2.5 text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
                   <Mail className="mt-0.5 size-4 shrink-0 text-primary" />
-                  halo@tataring.id
+                  hello@tataring.id
                 </a>
               </li>
               <li className="flex items-start gap-2.5 text-sm text-muted-foreground">
                 <Clock className="mt-0.5 size-4 shrink-0 text-primary" />
-                Senin–Sabtu, 08.00–17.00 WIB
+                Senin–Sabtu, 08.00–20.00 WIB
               </li>
               <li className="flex items-start gap-2.5 text-sm text-muted-foreground">
                 <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
-                Jl. Sisingamangaraja No. 88, Medan, Sumatera Utara
+                {SITE_STREET_ADDRESS}, {SITE_PROVINCE} {SITE_POSTAL_CODE}
               </li>
             </ul>
           </div>
