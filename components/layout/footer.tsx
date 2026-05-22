@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import { Phone, Mail, Clock, MapPin } from "lucide-react";
-import { SITE_NAME, SITE_TAGLINE, SITE_STREET_ADDRESS, SITE_PROVINCE, SITE_POSTAL_CODE } from "@/lib/constants";
+import { useLanguage } from "@/lib/i18n/context";
+import { SITE_NAME, SITE_STREET_ADDRESS, SITE_PROVINCE, SITE_POSTAL_CODE, WHATSAPP_NUMBER } from "@/lib/constants";
+import type { TranslationKey } from "@/lib/i18n/id";
 
 function IconInstagram({ className }: { className?: string }) {
   return (
@@ -22,18 +26,20 @@ function IconInstagram({ className }: { className?: string }) {
   );
 }
 
-const navLinks = [
-  { href: "/menu",         label: "Menu" },
-  { href: "/cerita-menu",  label: "Cerita Menu" },
-  { href: "/galeri",       label: "Galeri" },
-  { href: "/blog",         label: "Blog" },
-  { href: "/ketersediaan", label: "Ketersediaan" },
-  { href: "/tentang-kami", label: "Tentang Kami" },
-  { href: "/faq",          label: "FAQ" },
-  { href: "/kontak",       label: "Kontak" },
+const NAV_LINKS: { href: string; key: TranslationKey }[] = [
+  { href: "/menu",          key: "nav.menu" },
+  { href: "/cerita-menu",   key: "nav.cerita" },
+  { href: "/galeri",        key: "nav.galeri" },
+  { href: "/blog",          key: "nav.blog" },
+  { href: "/ketersediaan",  key: "nav.ketersediaan" },
+  { href: "/tentang-kami",  key: "nav.tentang" },
+  { href: "/kontak",        key: "nav.kontak" },
 ];
 
 export function Footer() {
+  const { t } = useLanguage();
+  const waHref = WHATSAPP_NUMBER ? `https://wa.me/${WHATSAPP_NUMBER}` : "https://wa.me/6288295218888";
+
   return (
     <footer className="mt-auto border-t border-border bg-card">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -43,12 +49,10 @@ export function Footer() {
           <div className="space-y-4">
             <div className="flex flex-col leading-none">
               <span className="font-heading text-2xl text-primary">TATARING</span>
-              <span className="text-[10px] tracking-widest text-muted-foreground uppercase">
-                CATERING
-              </span>
+              <span className="text-[10px] tracking-widest text-muted-foreground uppercase">CATERING</span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {SITE_TAGLINE} Catering Batak otentik untuk setiap momen spesialmu.
+              {t("footer.tagline")}. {t("footer.tagline_desc")}
             </p>
             <a
               href="https://instagram.com/tataringcatering"
@@ -62,19 +66,19 @@ export function Footer() {
             </a>
           </div>
 
-          {/* Quick links */}
+          {/* Nav links */}
           <div>
             <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">
-              Navigasi
+              {t("footer.nav_label")}
             </h3>
             <ul className="space-y-2.5">
-              {navLinks.map((link) => (
+              {NAV_LINKS.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
                     className="text-sm text-muted-foreground transition-colors hover:text-primary"
                   >
-                    {link.label}
+                    {t(link.key)}
                   </Link>
                 </li>
               ))}
@@ -84,12 +88,12 @@ export function Footer() {
           {/* Contact */}
           <div>
             <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">
-              Kontak
+              {t("footer.contact_label")}
             </h3>
             <ul className="space-y-3">
               <li>
                 <a
-                  href="https://wa.me/6288295218888"
+                  href={waHref}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-start gap-2.5 text-sm text-muted-foreground hover:text-primary transition-colors"
@@ -109,7 +113,7 @@ export function Footer() {
               </li>
               <li className="flex items-start gap-2.5 text-sm text-muted-foreground">
                 <Clock className="mt-0.5 size-4 shrink-0 text-primary" />
-                Senin–Sabtu, 08.00–20.00 WIB
+                {t("footer.hours")}
               </li>
               <li className="flex items-start gap-2.5 text-sm text-muted-foreground">
                 <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
@@ -120,10 +124,9 @@ export function Footer() {
 
         </div>
 
-        {/* Bottom bar */}
         <div className="mt-10 flex flex-col items-center justify-between gap-2 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row">
-          <p>© {new Date().getFullYear()} {SITE_NAME}. Semua hak dilindungi.</p>
-          <p>Mauliate godang atas kepercayaanmu.</p>
+          <p>© {new Date().getFullYear()} {SITE_NAME}. {t("footer.rights")}.</p>
+          <p>{t("footer.thanks")}</p>
         </div>
       </div>
     </footer>

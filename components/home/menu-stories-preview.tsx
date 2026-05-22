@@ -1,11 +1,16 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { SectionWrapper } from "@/components/ui/section-wrapper";
+import { useLanguage } from "@/lib/i18n/context";
 import type { MenuStory } from "@/types/database";
 
 function StoryCard({ story }: { story: MenuStory }) {
+  const { t } = useLanguage();
   const image = story.hero_image ?? `https://picsum.photos/seed/${story.slug}/800/500`;
+
   return (
     <Link
       href={`/cerita-menu/${story.slug}`}
@@ -22,7 +27,7 @@ function StoryCard({ story }: { story: MenuStory }) {
       </div>
       <div className="flex flex-col gap-2 p-5">
         <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-          Cerita di Balik Menu
+          {t("stories.card_label")}
         </p>
         <h3 className="font-heading text-xl text-foreground group-hover:text-primary transition-colors">
           {story.title}
@@ -36,6 +41,7 @@ function StoryCard({ story }: { story: MenuStory }) {
 }
 
 export function MenuStoriesPreview({ stories }: { stories: MenuStory[] }) {
+  const { t } = useLanguage();
   if (stories.length === 0) return null;
 
   return (
@@ -43,20 +49,17 @@ export function MenuStoriesPreview({ stories }: { stories: MenuStory[] }) {
       <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-            Storytelling
+            {t("stories.overline")}
           </p>
           <h2 className="mt-2 font-heading text-4xl text-foreground">
-            Cerita di Balik Menu
+            {t("stories.headline")}
           </h2>
           <p className="mt-2 text-muted-foreground">
-            Setiap hidangan Batak menyimpan filosofi dan cerita yang dalam.
+            {t("stories.subtext")}
           </p>
         </div>
-        <Link
-          href="/cerita-menu"
-          className={buttonVariants({ variant: "outline" })}
-        >
-          Lihat Semua Cerita
+        <Link href="/cerita-menu" className={buttonVariants({ variant: "outline" })}>
+          {t("stories.view_all")}
         </Link>
       </div>
 

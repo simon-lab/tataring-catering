@@ -1,16 +1,19 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { PackageBadge } from "@/components/ui/package-badge";
 import { formatRupiah } from "@/lib/utils";
+import { useLanguage } from "@/lib/i18n/context";
 import type { Package } from "@/types/database";
 
 export function PackageCard({ pkg }: { pkg: Package }) {
+  const { t } = useLanguage();
   const image = pkg.images?.[0] ?? `https://picsum.photos/seed/${pkg.slug}/800/600`;
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-shadow hover:shadow-lg">
-      {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <Image
           src={image}
@@ -26,23 +29,20 @@ export function PackageCard({ pkg }: { pkg: Package }) {
         )}
       </div>
 
-      {/* Content */}
       <div className="flex flex-1 flex-col gap-3 p-5">
         <div>
           <h3 className="font-heading text-xl text-foreground">{pkg.name}</h3>
-          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-            {pkg.description}
-          </p>
+          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{pkg.description}</p>
         </div>
 
         <div className="mt-auto space-y-3">
           <div className="flex items-baseline justify-between text-sm">
             <span className="font-semibold text-primary">
-              Mulai {formatRupiah(pkg.price_per_portion)}
-              <span className="font-normal text-muted-foreground"> / porsi</span>
+              {t("pkg.starting_from")} {formatRupiah(pkg.price_per_portion)}
+              <span className="font-normal text-muted-foreground"> {t("pkg.per_portion")}</span>
             </span>
             <span className="text-muted-foreground">
-              Min. {pkg.min_portion} porsi
+              {t("pkg.min_portion")} {pkg.min_portion} {t("pkg.per_portion")}
             </span>
           </div>
 
@@ -51,13 +51,13 @@ export function PackageCard({ pkg }: { pkg: Package }) {
               href={`/menu/${pkg.slug}`}
               className={buttonVariants({ variant: "outline", size: "sm", className: "flex-1 justify-center" })}
             >
-              Detail
+              {t("pkg.btn_detail")}
             </Link>
             <Link
               href={`/order?paket=${pkg.slug}`}
               className={buttonVariants({ size: "sm", className: "flex-1 justify-center" })}
             >
-              Pesan
+              {t("pkg.btn_order")}
             </Link>
           </div>
         </div>
