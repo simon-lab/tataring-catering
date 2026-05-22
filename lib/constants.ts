@@ -9,9 +9,9 @@ export const SITE_CITY           = "Bandung";
 export const SITE_PROVINCE       = "Jawa Barat";
 export const SITE_COUNTRY        = "Indonesia";
 export const SITE_POSTAL_CODE    = "40000";       // Ganti dengan kode pos aktual
-export const SITE_STREET_ADDRESS = "Jl. [Nama Jalan] No. [Nomor], [Kelurahan], [Kecamatan]"; // Ganti dengan alamat aktual
-export const SITE_GEO_LAT        = -6.9175;       // Ganti dengan koordinat GPS dari Google Maps
-export const SITE_GEO_LNG        = 107.6191;      // Ganti dengan koordinat GPS dari Google Maps
+export const SITE_STREET_ADDRESS = "Griya Pindad Asri B7 - 19, Jelegong, Rancaekek"; // Ganti dengan alamat aktual
+export const SITE_GEO_LAT        = -6.97351487518752;       // Ganti dengan koordinat GPS dari Google Maps
+export const SITE_GEO_LNG        = 107.76883109044017;      // Ganti dengan koordinat GPS dari Google Maps
 export const SITE_PHONE          = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER
   ? `+${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}`
   : "+6281xxxxxxxxx"; // Fallback — isi nomor bisnis aktual
