@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Plus, Pencil, Trash2, ToggleLeft, ToggleRight, Layers } from "lucide-react";
+import { useState, useTransition, useRef } from "react";
+import { Plus, Pencil, Trash2, ToggleLeft, ToggleRight, Layers, ImagePlus, Loader2, X } from "lucide-react";
 import { cn, formatRupiah, slugify } from "@/lib/utils";
 import { PACKAGE_CATEGORIES } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/client";
 import {
   createPackage,
   updatePackage,
@@ -39,8 +40,14 @@ const BADGE_OPTIONS = [
 const EMPTY_FORM: PackageFormData = {
   name: "", description: "", category: "pesta_adat",
   price_per_portion: 50000, min_portion: 20, max_portion: 500,
-  contents: "", badge: "", images: "", is_active: true,
+  contents: "", badge: "", images: [], is_active: true,
 };
+
+const MAX_IMAGES = 5;
+const MAX_SIZE_MB = 2;
+const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+const ACCEPT_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const ACCEPT_ATTR = ACCEPT_TYPES.join(",");
 
 function pkgToForm(p: Package): PackageFormData {
   return {
@@ -52,10 +59,127 @@ function pkgToForm(p: Package): PackageFormData {
     max_portion: p.max_portion,
     contents: (p.contents ?? []).join("\n"),
     badge: p.badge ?? "",
-    images: (p.images ?? []).join(", "),
+    images: p.images ?? [],
     is_active: p.is_active,
   };
 }
+
+// ─── Image uploader ────────────────────────────────────────────────────────────
+
+interface ImageUploaderProps {
+  images: string[];
+  onChange: (urls: string[]) => void;
+}
+
+function MenuImageUploader({ images, onChange }: ImageUploaderProps) {
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+    setUploadError(null);
+
+    if (images.length >= MAX_IMAGES) {
+      setUploadError(`Maksimal ${MAX_IMAGES} foto per paket`);
+      return;
+    }
+    if (!ACCEPT_TYPES.includes(file.type)) {
+      setUploadError("Format tidak didukung. Gunakan JPG, PNG, atau WebP");
+      return;
+    }
+    if (file.size > MAX_SIZE_BYTES) {
+      setUploadError(
+        `Foto terlalu besar (${(file.size / 1024 / 1024).toFixed(1)}MB). Maksimal ${MAX_SIZE_MB}MB per foto`
+      );
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const supabase = createClient();
+      const ext = file.name.split(".").pop() ?? "jpg";
+      const path = `menu/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+      const { error: storageErr } = await supabase.storage
+        .from("tataring")
+        .upload(path, file, { upsert: false });
+
+      if (storageErr) {
+        if (storageErr.message.includes("Bucket not found") || storageErr.message.includes("not found")) {
+          throw new Error("Bucket 'tataring' belum dibuat di Supabase Storage");
+        }
+        throw new Error("Upload gagal: " + storageErr.message);
+      }
+
+      const { data } = supabase.storage.from("tataring").getPublicUrl(path);
+      onChange([...images, data.publicUrl]);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Upload gagal, coba lagi");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    onChange(images.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-2">
+        {images.map((url, i) => (
+          <div key={url + i} className="relative size-20 overflow-hidden rounded-lg border border-border group flex-shrink-0">
+            <img src={url} alt="" className="h-full w-full object-cover" />
+            <button
+              type="button"
+              onClick={() => removeImage(i)}
+              className="absolute inset-0 flex items-center justify-center bg-black/55 opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <X className="size-4 text-white" />
+            </button>
+          </div>
+        ))}
+
+        {images.length < MAX_IMAGES && (
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="size-20 flex-shrink-0 rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center gap-1 text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-50"
+          >
+            {uploading
+              ? <Loader2 className="size-4 animate-spin" />
+              : <ImagePlus className="size-4" />}
+            <span className="text-[10px] font-medium leading-none">
+              {uploading ? "Upload..." : "Tambah"}
+            </span>
+          </button>
+        )}
+      </div>
+
+      <input
+        ref={fileRef}
+        type="file"
+        accept={ACCEPT_ATTR}
+        onChange={handleFile}
+        className="hidden"
+      />
+
+      {uploadError && (
+        <p className="text-xs text-destructive">{uploadError}</p>
+      )}
+
+      <p className="text-xs text-muted-foreground">
+        Maks. {MAX_IMAGES} foto · {MAX_SIZE_MB}MB per foto · JPG, PNG, WebP
+      </p>
+    </div>
+  );
+}
+
+// ─── Main table ────────────────────────────────────────────────────────────────
 
 function ErrorBanner({ message }: { message: string }) {
   return (
@@ -129,7 +253,7 @@ export function MenuTable({ packages }: { packages: Package[] }) {
         </button>
       </div>
 
-      {/* Action error (toggle/delete) */}
+      {/* Action error */}
       {actionError && (
         <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-2.5 text-sm text-destructive">
           {actionError}
@@ -192,15 +316,8 @@ export function MenuTable({ packages }: { packages: Package[] }) {
                 ))}
               </select>
             </div>
-            {/* Images */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-foreground">URL Foto (pisah koma)</label>
-              <input value={form.images} onChange={(e) => f("images", e.target.value)}
-                placeholder="https://..., https://..."
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
-            </div>
             {/* Description */}
-            <div className="space-y-1.5 sm:col-span-2">
+            <div className="space-y-1.5">
               <label className="text-xs font-medium text-foreground">Deskripsi</label>
               <textarea value={form.description} onChange={(e) => f("description", e.target.value)}
                 rows={2} className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
@@ -211,6 +328,14 @@ export function MenuTable({ packages }: { packages: Package[] }) {
               <textarea value={form.contents} onChange={(e) => f("contents", e.target.value)}
                 rows={4} placeholder="Saksang&#10;Arsik&#10;Na Niura"
                 className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm font-mono outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+            {/* Image upload */}
+            <div className="space-y-1.5 sm:col-span-2">
+              <label className="text-xs font-medium text-foreground">Foto Paket</label>
+              <MenuImageUploader
+                images={form.images}
+                onChange={(urls) => f("images", urls)}
+              />
             </div>
             {/* Active */}
             <div className="flex items-center gap-2 sm:col-span-2">
@@ -258,13 +383,23 @@ export function MenuTable({ packages }: { packages: Package[] }) {
           <div className="divide-y divide-border">
             {packages.map((pkg) => (
               <div key={pkg.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] items-center gap-3 px-4 py-3 text-sm">
-                <div>
-                  <p className={cn("font-medium", pkg.is_active ? "text-foreground" : "text-muted-foreground line-through")}>
-                    {pkg.name}
-                  </p>
-                  {pkg.badge && (
-                    <span className="text-xs text-secondary-foreground">{pkg.badge}</span>
+                <div className="flex items-center gap-3 min-w-0">
+                  {pkg.images && pkg.images.length > 0 ? (
+                    <img src={pkg.images[0]} alt={pkg.name}
+                      className="size-10 flex-shrink-0 rounded-lg object-cover border border-border" />
+                  ) : (
+                    <div className="size-10 flex-shrink-0 rounded-lg border border-dashed border-border bg-muted flex items-center justify-center">
+                      <ImagePlus className="size-3.5 text-muted-foreground" />
+                    </div>
                   )}
+                  <div className="min-w-0">
+                    <p className={cn("font-medium truncate", pkg.is_active ? "text-foreground" : "text-muted-foreground line-through")}>
+                      {pkg.name}
+                    </p>
+                    {pkg.badge && (
+                      <span className="text-xs text-secondary-foreground">{pkg.badge}</span>
+                    )}
+                  </div>
                 </div>
                 <p className="text-xs text-muted-foreground">{catLabel(pkg.category)}</p>
                 <p>{formatRupiah(pkg.price_per_portion)}</p>

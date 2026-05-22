@@ -17,16 +17,12 @@ export interface PackageFormData {
   max_portion: number;
   contents: string;   // newline-separated → akan di-split jadi array
   badge: string;
-  images: string;     // comma-separated URLs
+  images: string[];   // URL array, diupload dari client
   is_active: boolean;
 }
 
 function parseContents(raw: string): string[] {
   return raw.split("\n").map((s) => s.trim()).filter(Boolean);
-}
-
-function parseImages(raw: string): string[] {
-  return raw.split(",").map((s) => s.trim()).filter(Boolean);
 }
 
 export async function createPackage(form: PackageFormData): Promise<ActionResult> {
@@ -40,7 +36,7 @@ export async function createPackage(form: PackageFormData): Promise<ActionResult
     max_portion: form.max_portion,
     contents: parseContents(form.contents),
     badge: form.badge || null,
-    images: parseImages(form.images),
+    images: form.images,
     is_active: form.is_active,
     updated_at: new Date().toISOString(),
   });
@@ -63,7 +59,7 @@ export async function updatePackage(id: string, form: PackageFormData): Promise<
       max_portion: form.max_portion,
       contents: parseContents(form.contents),
       badge: form.badge || null,
-      images: parseImages(form.images),
+      images: form.images,
       is_active: form.is_active,
       updated_at: new Date().toISOString(),
     })
