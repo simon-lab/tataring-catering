@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useTransition, useRef } from "react";
-import { Upload, Trash2, Loader2 } from "lucide-react";
+import { useState, useTransition } from "react";
+import { Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EVENT_TYPES } from "@/lib/constants";
-import { createClient } from "@/lib/supabase/client";
-import { translateDbError } from "@/lib/supabase/errors";
 import { addGalleryItem, deleteGalleryItem } from "@/app/admin/galeri/actions";
+import { StoryHeroUploader } from "@/components/admin/story-hero-uploader";
 
 interface GalleryItem {
   id: string;
@@ -20,61 +19,26 @@ const eventLabel = (v: string | null) =>
   EVENT_TYPES.find((t) => t.value === v)?.label ?? "—";
 
 export function GaleriManager({ items }: { items: GalleryItem[] }) {
+  const [imageUrl, setImageUrl] = useState("");
   const [caption, setCaption] = useState("");
   const [eventType, setEventType] = useState("");
   const [eventDate, setEventDate] = useState("");
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState("");
+  const [saveError, setSaveError] = useState("");
   const [deleteError, setDeleteError] = useState("");
   const [isPending, startTransition] = useTransition();
-  const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleUpload = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const file = fileRef.current?.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-    setUploadError("");
-
-    try {
-      const supabase = createClient();
-      const ext = file.name.split(".").pop();
-      const path = `gallery/${Date.now()}.${ext}`;
-
-      const { error: uploadErr } = await supabase.storage
-        .from("tataring")
-        .upload(path, file, { upsert: false });
-
-      if (uploadErr) {
-        if (uploadErr.message.includes("Bucket not found") || uploadErr.message.includes("not found")) {
-          throw new Error("Bucket 'tataring' belum dibuat di Supabase Storage. Buat bucket terlebih dahulu.");
-        }
-        if (uploadErr.message.includes("exceeded") || uploadErr.message.includes("too large")) {
-          throw new Error("Ukuran file terlalu besar. Maksimal 5MB per foto.");
-        }
-        if (uploadErr.message.includes("mime") || uploadErr.message.includes("type")) {
-          throw new Error("Format file tidak didukung. Gunakan JPG, PNG, atau WebP.");
-        }
-        throw new Error(uploadErr.message);
+    if (!imageUrl) return;
+    setSaveError("");
+    startTransition(async () => {
+      const result = await addGalleryItem(imageUrl, caption, eventType, eventDate);
+      if (result.error) {
+        setSaveError(result.error);
+      } else {
+        setImageUrl(""); setCaption(""); setEventType(""); setEventDate("");
       }
-
-      const { data: urlData } = supabase.storage
-        .from("tataring")
-        .getPublicUrl(path);
-
-      const result = await addGalleryItem(urlData.publicUrl, caption, eventType, eventDate);
-      if (result.error) throw new Error(result.error);
-
-      setCaption(""); setEventType(""); setEventDate("");
-      if (fileRef.current) fileRef.current.value = "";
-    } catch (err) {
-      setUploadError(
-        err instanceof Error ? err.message : translateDbError("unknown")
-      );
-    } finally {
-      setUploading(false);
-    }
+    });
   };
 
   const handleDelete = (id: string) => {
@@ -90,12 +54,15 @@ export function GaleriManager({ items }: { items: GalleryItem[] }) {
     <div className="space-y-6">
       {/* Upload form */}
       <div className="rounded-xl border border-border bg-card p-5 space-y-4">
-        <h3 className="font-semibold text-foreground">Upload Foto Baru</h3>
-        <form onSubmit={handleUpload} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <h3 className="font-semibold text-foreground">Tambah Foto</h3>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5 sm:col-span-2">
-            <label className="text-xs font-medium text-foreground">Pilih Foto *</label>
-            <input ref={fileRef} type="file" accept="image/*" required
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1 file:text-xs file:font-medium file:text-primary" />
+            <label className="text-xs font-medium text-foreground">Foto *</label>
+            <StoryHeroUploader
+              value={imageUrl}
+              onChange={setImageUrl}
+              storagePath="gallery"
+            />
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-foreground">Caption</label>
@@ -116,22 +83,19 @@ export function GaleriManager({ items }: { items: GalleryItem[] }) {
             <input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)}
               className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
           </div>
-          {uploadError && (
+          {saveError && (
             <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive sm:col-span-2">
-              {uploadError}
+              {saveError}
             </p>
           )}
           <div className="sm:col-span-2">
-            <button type="submit" disabled={uploading || isPending}
+            <button type="submit" disabled={!imageUrl || isPending}
               className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50">
-              {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
-              {uploading ? "Mengupload..." : "Upload Foto"}
+              <Plus className="size-4" />
+              {isPending ? "Menyimpan..." : "Tambah ke Galeri"}
             </button>
           </div>
         </form>
-        <p className="text-xs text-muted-foreground">
-          Pastikan bucket <code className="rounded bg-muted px-1">tataring</code> sudah dibuat di Supabase Storage dengan akses publik.
-        </p>
       </div>
 
       {/* Delete error */}
