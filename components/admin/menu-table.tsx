@@ -63,17 +63,23 @@ export function MenuTable({ packages }: { packages: Package[] }) {
   const [form, setForm] = useState<PackageFormData>(EMPTY_FORM);
   const [variantPkg, setVariantPkg] = useState<Package | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [formError, setFormError] = useState<string | null>(null);
 
-  const openCreate = () => { setForm(EMPTY_FORM); setEditId(null); setShowForm(true); };
-  const openEdit   = (p: Package) => { setForm(pkgToForm(p)); setEditId(p.id); setShowForm(true); };
-  const closeForm  = () => { setShowForm(false); setEditId(null); };
+  const openCreate = () => { setForm(EMPTY_FORM); setEditId(null); setFormError(null); setShowForm(true); };
+  const openEdit   = (p: Package) => { setForm(pkgToForm(p)); setEditId(p.id); setFormError(null); setShowForm(true); };
+  const closeForm  = () => { setShowForm(false); setEditId(null); setFormError(null); };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
     startTransition(async () => {
-      if (editId) await updatePackage(editId, form);
-      else await createPackage(form);
-      closeForm();
+      try {
+        if (editId) await updatePackage(editId, form);
+        else await createPackage(form);
+        closeForm();
+      } catch (err) {
+        setFormError(err instanceof Error ? err.message : "Terjadi kesalahan, coba lagi.");
+      }
     });
   };
 
@@ -184,6 +190,12 @@ export function MenuTable({ packages }: { packages: Package[] }) {
                 Aktif (tampil di halaman menu)
               </label>
             </div>
+            {/* Error */}
+            {formError && (
+              <div className="sm:col-span-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                {formError}
+              </div>
+            )}
             {/* Buttons */}
             <div className="flex gap-3 sm:col-span-2">
               <button type="submit" disabled={isPending}

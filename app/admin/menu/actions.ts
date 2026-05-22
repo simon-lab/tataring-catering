@@ -29,7 +29,7 @@ function parseImages(raw: string): string[] {
 }
 
 export async function createPackage(form: PackageFormData) {
-  await db().from("packages").insert({
+  const { error } = await db().from("packages").insert({
     name: form.name,
     slug: slugify(form.name),
     description: form.description || null,
@@ -41,13 +41,15 @@ export async function createPackage(form: PackageFormData) {
     badge: form.badge || null,
     images: parseImages(form.images),
     is_active: form.is_active,
+    updated_at: new Date().toISOString(),
   });
+  if (error) throw new Error(error.message);
   revalidatePath("/admin/menu");
   revalidatePath("/menu");
 }
 
 export async function updatePackage(id: string, form: PackageFormData) {
-  await db()
+  const { error } = await db()
     .from("packages")
     .update({
       name: form.name,
@@ -64,6 +66,7 @@ export async function updatePackage(id: string, form: PackageFormData) {
       updated_at: new Date().toISOString(),
     })
     .eq("id", id);
+  if (error) throw new Error(error.message);
   revalidatePath("/admin/menu");
   revalidatePath("/menu");
 }
