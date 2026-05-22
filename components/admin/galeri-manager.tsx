@@ -5,6 +5,7 @@ import { Upload, Trash2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EVENT_TYPES } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
+import { translateDbError } from "@/lib/supabase/errors";
 import { addGalleryItem, deleteGalleryItem } from "@/app/admin/galeri/actions";
 
 interface GalleryItem {
@@ -24,6 +25,7 @@ export function GaleriManager({ items }: { items: GalleryItem[] }) {
   const [eventDate, setEventDate] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const [deleteError, setDeleteError] = useState("");
   const [isPending, startTransition] = useTransition();
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -44,25 +46,44 @@ export function GaleriManager({ items }: { items: GalleryItem[] }) {
         .from("tataring")
         .upload(path, file, { upsert: false });
 
-      if (uploadErr) throw new Error(uploadErr.message);
+      if (uploadErr) {
+        if (uploadErr.message.includes("Bucket not found") || uploadErr.message.includes("not found")) {
+          throw new Error("Bucket 'tataring' belum dibuat di Supabase Storage. Buat bucket terlebih dahulu.");
+        }
+        if (uploadErr.message.includes("exceeded") || uploadErr.message.includes("too large")) {
+          throw new Error("Ukuran file terlalu besar. Maksimal 5MB per foto.");
+        }
+        if (uploadErr.message.includes("mime") || uploadErr.message.includes("type")) {
+          throw new Error("Format file tidak didukung. Gunakan JPG, PNG, atau WebP.");
+        }
+        throw new Error(uploadErr.message);
+      }
 
       const { data: urlData } = supabase.storage
         .from("tataring")
         .getPublicUrl(path);
 
-      await addGalleryItem(urlData.publicUrl, caption, eventType, eventDate);
+      const result = await addGalleryItem(urlData.publicUrl, caption, eventType, eventDate);
+      if (result.error) throw new Error(result.error);
 
       setCaption(""); setEventType(""); setEventDate("");
       if (fileRef.current) fileRef.current.value = "";
     } catch (err) {
       setUploadError(
-        err instanceof Error
-          ? err.message
-          : "Upload gagal. Pastikan Supabase Storage bucket 'tataring' sudah dibuat."
+        err instanceof Error ? err.message : translateDbError("unknown")
       );
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleDelete = (id: string) => {
+    if (!confirm("Hapus foto ini dari galeri?")) return;
+    setDeleteError("");
+    startTransition(async () => {
+      const result = await deleteGalleryItem(id);
+      if (result.error) setDeleteError(result.error);
+    });
   };
 
   return (
@@ -71,7 +92,6 @@ export function GaleriManager({ items }: { items: GalleryItem[] }) {
       <div className="rounded-xl border border-border bg-card p-5 space-y-4">
         <h3 className="font-semibold text-foreground">Upload Foto Baru</h3>
         <form onSubmit={handleUpload} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {/* File input */}
           <div className="space-y-1.5 sm:col-span-2">
             <label className="text-xs font-medium text-foreground">Pilih Foto *</label>
             <input ref={fileRef} type="file" accept="image/*" required
@@ -97,7 +117,7 @@ export function GaleriManager({ items }: { items: GalleryItem[] }) {
               className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
           </div>
           {uploadError && (
-            <p className="rounded-lg bg-destructive/10 px-3 py-2 text-xs text-destructive sm:col-span-2">
+            <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive sm:col-span-2">
               {uploadError}
             </p>
           )}
@@ -114,6 +134,13 @@ export function GaleriManager({ items }: { items: GalleryItem[] }) {
         </p>
       </div>
 
+      {/* Delete error */}
+      {deleteError && (
+        <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-2.5 text-sm text-destructive">
+          {deleteError}
+        </div>
+      )}
+
       {/* Gallery grid */}
       {items.length === 0 ? (
         <p className="py-10 text-center text-sm text-muted-foreground">
@@ -127,15 +154,17 @@ export function GaleriManager({ items }: { items: GalleryItem[] }) {
                 <img src={item.image_url} alt={item.caption ?? ""}
                   className="h-full w-full object-cover" loading="lazy" />
               </div>
-              {/* Overlay */}
               <div className="absolute inset-0 flex flex-col justify-between bg-black/50 p-2 opacity-0 transition-opacity group-hover:opacity-100">
                 <div className="text-xs text-white space-y-0.5">
                   {item.caption && <p className="font-medium">{item.caption}</p>}
                   {item.event_type && <p className="opacity-75">{eventLabel(item.event_type)}</p>}
                 </div>
                 <button
-                  onClick={() => { if (confirm("Hapus foto ini?")) startTransition(() => deleteGalleryItem(item.id)); }}
-                  className="self-end flex size-7 items-center justify-center rounded-lg bg-destructive/80 text-white hover:bg-destructive transition-colors"
+                  onClick={() => handleDelete(item.id)}
+                  className={cn(
+                    "self-end flex size-7 items-center justify-center rounded-lg bg-destructive/80 text-white hover:bg-destructive transition-colors",
+                    isPending && "opacity-50 pointer-events-none"
+                  )}
                 >
                   <Trash2 className="size-3.5" />
                 </button>

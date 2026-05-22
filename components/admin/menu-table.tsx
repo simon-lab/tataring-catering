@@ -38,7 +38,7 @@ const BADGE_OPTIONS = [
 
 const EMPTY_FORM: PackageFormData = {
   name: "", description: "", category: "pesta_adat",
-  price_per_portion: 0, min_portion: 20, max_portion: 500,
+  price_per_portion: 50000, min_portion: 20, max_portion: 500,
   contents: "", badge: "", images: "", is_active: true,
 };
 
@@ -57,6 +57,14 @@ function pkgToForm(p: Package): PackageFormData {
   };
 }
 
+function ErrorBanner({ message }: { message: string }) {
+  return (
+    <div className="sm:col-span-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+      {message}
+    </div>
+  );
+}
+
 export function MenuTable({ packages }: { packages: Package[] }) {
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -64,6 +72,7 @@ export function MenuTable({ packages }: { packages: Package[] }) {
   const [variantPkg, setVariantPkg] = useState<Package | null>(null);
   const [isPending, startTransition] = useTransition();
   const [formError, setFormError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const openCreate = () => { setForm(EMPTY_FORM); setEditId(null); setFormError(null); setShowForm(true); };
   const openEdit   = (p: Package) => { setForm(pkgToForm(p)); setEditId(p.id); setFormError(null); setShowForm(true); };
@@ -86,7 +95,19 @@ export function MenuTable({ packages }: { packages: Package[] }) {
 
   const handleDelete = (id: string, name: string) => {
     if (!confirm(`Hapus paket "${name}"?`)) return;
-    startTransition(() => deletePackage(id));
+    setActionError(null);
+    startTransition(async () => {
+      const result = await deletePackage(id);
+      if (result.error) setActionError(result.error);
+    });
+  };
+
+  const handleToggle = (id: string, current: boolean) => {
+    setActionError(null);
+    startTransition(async () => {
+      const result = await togglePackageActive(id, !current);
+      if (result.error) setActionError(result.error);
+    });
   };
 
   const f = (field: keyof PackageFormData, value: unknown) =>
@@ -108,6 +129,13 @@ export function MenuTable({ packages }: { packages: Package[] }) {
         </button>
       </div>
 
+      {/* Action error (toggle/delete) */}
+      {actionError && (
+        <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-2.5 text-sm text-destructive">
+          {actionError}
+        </div>
+      )}
+
       {/* Form panel */}
       {showForm && (
         <div className="rounded-xl border border-primary/30 bg-card p-5 space-y-4">
@@ -120,6 +148,7 @@ export function MenuTable({ packages }: { packages: Package[] }) {
               <label className="text-xs font-medium text-foreground">Nama Paket *</label>
               <input value={form.name} onChange={(e) => f("name", e.target.value)} required
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
+              {form.name && <p className="text-xs text-muted-foreground">Slug: {slugify(form.name)}</p>}
             </div>
             {/* Category */}
             <div className="space-y-1.5">
@@ -135,7 +164,7 @@ export function MenuTable({ packages }: { packages: Package[] }) {
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-foreground">Harga/Porsi (Rp) *</label>
               <input type="number" value={form.price_per_portion}
-                onChange={(e) => f("price_per_portion", Number(e.target.value))} required min={0}
+                onChange={(e) => f("price_per_portion", Number(e.target.value))} required min={1}
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
             </div>
             {/* Portions */}
@@ -192,11 +221,7 @@ export function MenuTable({ packages }: { packages: Package[] }) {
               </label>
             </div>
             {/* Error */}
-            {formError && (
-              <div className="sm:col-span-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {formError}
-              </div>
-            )}
+            {formError && <ErrorBanner message={formError} />}
             {/* Buttons */}
             <div className="flex gap-3 sm:col-span-2">
               <button type="submit" disabled={isPending}
@@ -245,12 +270,11 @@ export function MenuTable({ packages }: { packages: Package[] }) {
                 <p>{formatRupiah(pkg.price_per_portion)}</p>
                 <p className="text-xs text-muted-foreground">{pkg.min_portion}–{pkg.max_portion}</p>
                 <div className="flex items-center gap-1">
-                  <button onClick={() => startTransition(() => togglePackageActive(pkg.id, !pkg.is_active))}
+                  <button onClick={() => handleToggle(pkg.id, pkg.is_active)}
                     title={pkg.is_active ? "Nonaktifkan" : "Aktifkan"}
                     className="flex size-8 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-muted">
                     {pkg.is_active ? <ToggleRight className="size-4 text-primary" /> : <ToggleLeft className="size-4" />}
                   </button>
-                  {/* Varian button */}
                   <button
                     onClick={() => setVariantPkg(pkg)}
                     title="Kelola varian"

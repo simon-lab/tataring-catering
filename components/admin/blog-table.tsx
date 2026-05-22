@@ -39,26 +39,46 @@ export function BlogTable({ posts }: { posts: BlogPost[] }) {
   const [form, setForm] = useState<BlogFormData>(EMPTY);
   const [isPending, startTransition] = useTransition();
   const [excerptLen, setExcerptLen] = useState(0);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
-  const openCreate = () => { setForm(EMPTY); setEditId(null); setShowForm(true); setExcerptLen(0); };
-  const openEdit   = (p: BlogPost) => { setForm(postToForm(p)); setEditId(p.id); setShowForm(true); setExcerptLen(p.excerpt?.length ?? 0); };
-  const closeForm  = () => { setShowForm(false); setEditId(null); };
+  const openCreate = () => { setForm(EMPTY); setEditId(null); setFormError(null); setShowForm(true); setExcerptLen(0); };
+  const openEdit   = (p: BlogPost) => { setForm(postToForm(p)); setEditId(p.id); setFormError(null); setShowForm(true); setExcerptLen(p.excerpt?.length ?? 0); };
+  const closeForm  = () => { setShowForm(false); setEditId(null); setFormError(null); };
 
   const f = (field: keyof BlogFormData, value: unknown) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
     startTransition(async () => {
-      if (editId) await updatePost(editId, form);
-      else await createPost(form);
-      closeForm();
+      const result = editId
+        ? await updatePost(editId, form)
+        : await createPost(form);
+      if (result.error) {
+        setFormError(result.error);
+      } else {
+        closeForm();
+      }
     });
   };
 
   const handleDelete = (id: string, title: string) => {
     if (!confirm(`Hapus artikel "${title}"?`)) return;
-    startTransition(() => deletePost(id));
+    setActionError(null);
+    startTransition(async () => {
+      const result = await deletePost(id);
+      if (result.error) setActionError(result.error);
+    });
+  };
+
+  const handleToggle = (id: string, current: boolean) => {
+    setActionError(null);
+    startTransition(async () => {
+      const result = await togglePostPublished(id, !current);
+      if (result.error) setActionError(result.error);
+    });
   };
 
   return (
@@ -69,6 +89,13 @@ export function BlogTable({ posts }: { posts: BlogPost[] }) {
           <Plus className="size-4" /> Tulis Artikel
         </button>
       </div>
+
+      {/* Action error */}
+      {actionError && (
+        <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-2.5 text-sm text-destructive">
+          {actionError}
+        </div>
+      )}
 
       {/* Form */}
       {showForm && (
@@ -128,6 +155,11 @@ export function BlogTable({ posts }: { posts: BlogPost[] }) {
                 onChange={(e) => f("is_published", e.target.checked)} className="accent-primary" />
               <label htmlFor="post-pub" className="text-sm font-medium">Publish sekarang</label>
             </div>
+            {formError && (
+              <div className="sm:col-span-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                {formError}
+              </div>
+            )}
             <div className="flex gap-3 sm:col-span-2">
               <button type="submit" disabled={isPending}
                 className="rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50">
@@ -165,7 +197,7 @@ export function BlogTable({ posts }: { posts: BlogPost[] }) {
                   {p.is_published ? "Published" : "Draft"}
                 </span>
                 <div className="flex items-center gap-1">
-                  <button onClick={() => startTransition(() => togglePostPublished(p.id, !p.is_published))}
+                  <button onClick={() => handleToggle(p.id, p.is_published)}
                     title={p.is_published ? "Jadikan draft" : "Publish"}
                     className="flex size-8 items-center justify-center rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
                     {p.is_published ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}

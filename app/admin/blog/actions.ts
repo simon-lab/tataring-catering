@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { slugify, estimateReadTime } from "@/lib/utils";
+import { translateDbError, OK, type ActionResult } from "@/lib/supabase/errors";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = () => createAdminClient() as any;
@@ -19,8 +20,8 @@ export interface BlogFormData {
   is_published: boolean;
 }
 
-export async function createPost(form: BlogFormData) {
-  await db().from("blog_posts").insert({
+export async function createPost(form: BlogFormData): Promise<ActionResult> {
+  const { error } = await db().from("blog_posts").insert({
     title: form.title,
     slug: slugify(form.title),
     category: form.category,
@@ -34,12 +35,14 @@ export async function createPost(form: BlogFormData) {
     is_published: form.is_published,
     published_at: form.is_published ? new Date().toISOString() : null,
   });
+  if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/blog");
   revalidatePath("/blog");
+  return OK;
 }
 
-export async function updatePost(id: string, form: BlogFormData) {
-  await db()
+export async function updatePost(id: string, form: BlogFormData): Promise<ActionResult> {
+  const { error } = await db()
     .from("blog_posts")
     .update({
       title: form.title,
@@ -57,18 +60,22 @@ export async function updatePost(id: string, form: BlogFormData) {
       updated_at: new Date().toISOString(),
     })
     .eq("id", id);
+  if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/blog");
   revalidatePath("/blog");
+  return OK;
 }
 
-export async function deletePost(id: string) {
-  await db().from("blog_posts").delete().eq("id", id);
+export async function deletePost(id: string): Promise<ActionResult> {
+  const { error } = await db().from("blog_posts").delete().eq("id", id);
+  if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/blog");
   revalidatePath("/blog");
+  return OK;
 }
 
-export async function togglePostPublished(id: string, is_published: boolean) {
-  await db()
+export async function togglePostPublished(id: string, is_published: boolean): Promise<ActionResult> {
+  const { error } = await db()
     .from("blog_posts")
     .update({
       is_published,
@@ -76,6 +83,8 @@ export async function togglePostPublished(id: string, is_published: boolean) {
       updated_at: new Date().toISOString(),
     })
     .eq("id", id);
+  if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/blog");
   revalidatePath("/blog");
+  return OK;
 }

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { translateDbError, OK, type ActionResult } from "@/lib/supabase/errors";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = () => createAdminClient() as any;
@@ -15,8 +16,8 @@ export interface TestimoniFormData {
   is_published: boolean;
 }
 
-export async function createTestimoni(form: TestimoniFormData) {
-  await db().from("testimonials").insert({
+export async function createTestimoni(form: TestimoniFormData): Promise<ActionResult> {
+  const { error } = await db().from("testimonials").insert({
     customer_name: form.customer_name,
     event_type: form.event_type || null,
     rating: form.rating,
@@ -24,12 +25,14 @@ export async function createTestimoni(form: TestimoniFormData) {
     customer_photo: form.customer_photo || null,
     is_published: form.is_published,
   });
+  if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/testimoni");
   revalidatePath("/testimoni");
+  return OK;
 }
 
-export async function updateTestimoni(id: string, form: TestimoniFormData) {
-  await db()
+export async function updateTestimoni(id: string, form: TestimoniFormData): Promise<ActionResult> {
+  const { error } = await db()
     .from("testimonials")
     .update({
       customer_name: form.customer_name,
@@ -40,18 +43,24 @@ export async function updateTestimoni(id: string, form: TestimoniFormData) {
       is_published: form.is_published,
     })
     .eq("id", id);
+  if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/testimoni");
   revalidatePath("/testimoni");
+  return OK;
 }
 
-export async function deleteTestimoni(id: string) {
-  await db().from("testimonials").delete().eq("id", id);
+export async function deleteTestimoni(id: string): Promise<ActionResult> {
+  const { error } = await db().from("testimonials").delete().eq("id", id);
+  if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/testimoni");
   revalidatePath("/testimoni");
+  return OK;
 }
 
-export async function toggleTestimoniPublished(id: string, is_published: boolean) {
-  await db().from("testimonials").update({ is_published }).eq("id", id);
+export async function toggleTestimoniPublished(id: string, is_published: boolean): Promise<ActionResult> {
+  const { error } = await db().from("testimonials").update({ is_published }).eq("id", id);
+  if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/testimoni");
   revalidatePath("/testimoni");
+  return OK;
 }

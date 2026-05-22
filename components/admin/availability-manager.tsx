@@ -72,6 +72,7 @@ export function AvailabilityManager({ availabilityMap, defaultSlotCapacity }: Pr
   const [bookedInput, setBookedInput] = useState("");
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState("");
+  const [actionError, setActionError] = useState("");
 
   const selectedKey = selected ? toLocalDateStr(selected) : null;
   const selectedRec = selectedKey ? localMap[selectedKey] : null;
@@ -91,12 +92,16 @@ export function AvailabilityManager({ availabilityMap, defaultSlotCapacity }: Pr
     });
   };
 
+  const notify = (msg: string) => { setMessage(msg); setActionError(""); };
+  const err = (msg: string) => { setActionError(msg); setMessage(""); };
+
   const handleBlock = () => {
     if (!selectedKey) return;
     startTransition(async () => {
-      await blockDate(selectedKey, blockReason);
+      const result = await blockDate(selectedKey, blockReason);
+      if (result.error) { err(result.error); return; }
       updateLocalMap(selectedKey, { is_blocked: true, block_reason: blockReason || null });
-      setMessage("Tanggal ditandai libur");
+      notify("Tanggal ditandai libur");
       setBlockReason("");
     });
   };
@@ -104,9 +109,10 @@ export function AvailabilityManager({ availabilityMap, defaultSlotCapacity }: Pr
   const handleUnblock = () => {
     if (!selectedKey) return;
     startTransition(async () => {
-      await unblockDate(selectedKey);
+      const result = await unblockDate(selectedKey);
+      if (result.error) { err(result.error); return; }
       updateLocalMap(selectedKey, { is_blocked: false, block_reason: null });
-      setMessage("Tanggal berhasil dibuka");
+      notify("Tanggal berhasil dibuka");
     });
   };
 
@@ -115,9 +121,10 @@ export function AvailabilityManager({ availabilityMap, defaultSlotCapacity }: Pr
     const cap = parseInt(capacityInput);
     if (!cap || cap < 1) return;
     startTransition(async () => {
-      await setCapacity(selectedKey, cap);
+      const result = await setCapacity(selectedKey, cap);
+      if (result.error) { err(result.error); return; }
       updateLocalMap(selectedKey, { max_slots: cap });
-      setMessage(`Kapasitas diubah ke ${cap} slot`);
+      notify(`Kapasitas diubah ke ${cap} slot`);
     });
   };
 
@@ -128,9 +135,10 @@ export function AvailabilityManager({ availabilityMap, defaultSlotCapacity }: Pr
     const currentMax = selectedRec?.max_slots ?? defaultSlotCapacity;
     if (booked > currentMax) return;
     startTransition(async () => {
-      await updateBookedSlots(selectedKey, booked, currentMax);
+      const result = await updateBookedSlots(selectedKey, booked, currentMax);
+      if (result.error) { err(result.error); return; }
       updateLocalMap(selectedKey, { booked_slots: booked });
-      setMessage(`Terboking diperbarui ke ${booked} slot`);
+      notify(`Terboking diperbarui ke ${booked} slot`);
       setBookedInput("");
     });
   };
@@ -345,6 +353,11 @@ export function AvailabilityManager({ availabilityMap, defaultSlotCapacity }: Pr
             {message && (
               <p className="rounded-lg bg-accent/10 px-3 py-2 text-xs font-medium text-accent">
                 ✓ {message}
+              </p>
+            )}
+            {actionError && (
+              <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs font-medium text-destructive">
+                {actionError}
               </p>
             )}
           </div>

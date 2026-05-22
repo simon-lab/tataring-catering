@@ -41,6 +41,7 @@ export function VariantModal({
   const [variants, setVariants] = useState<PackageVariant[]>(initialVariants);
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const add = () => setVariants((prev) => [...prev, emptyVariant()]);
 
@@ -58,8 +59,13 @@ export function VariantModal({
     );
 
   const handleSave = () => {
+    setSaveError(null);
     startTransition(async () => {
-      await saveVariants(packageId, variants);
+      const result = await saveVariants(packageId, variants);
+      if (result.error) {
+        setSaveError(result.error);
+        return;
+      }
       setSaved(true);
       setTimeout(() => {
         setSaved(false);
@@ -234,6 +240,11 @@ export function VariantModal({
         </div>
 
         {/* Footer */}
+        {saveError && (
+          <div className="shrink-0 border-t border-destructive/20 bg-destructive/10 px-6 py-3 text-sm text-destructive">
+            {saveError}
+          </div>
+        )}
         <div className="flex shrink-0 items-center justify-between border-t border-border px-6 py-4">
           <p className="text-xs text-muted-foreground">
             {variants.length} varian &middot; hanya 1 bisa ditandai Terpopuler

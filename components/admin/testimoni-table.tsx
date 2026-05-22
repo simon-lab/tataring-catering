@@ -33,19 +33,44 @@ export function TestimoniTable({ testimonials }: { testimonials: Testimoni[] }) 
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<TestimoniFormData>(EMPTY);
   const [isPending, startTransition] = useTransition();
+  const [formError, setFormError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
-  const openCreate = () => { setForm(EMPTY); setEditId(null); setShowForm(true); };
-  const openEdit   = (t: Testimoni) => { setForm(toForm(t)); setEditId(t.id); setShowForm(true); };
-  const closeForm  = () => { setShowForm(false); setEditId(null); };
+  const openCreate = () => { setForm(EMPTY); setEditId(null); setFormError(null); setShowForm(true); };
+  const openEdit   = (t: Testimoni) => { setForm(toForm(t)); setEditId(t.id); setFormError(null); setShowForm(true); };
+  const closeForm  = () => { setShowForm(false); setEditId(null); setFormError(null); };
   const f = (field: keyof TestimoniFormData, value: unknown) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
     startTransition(async () => {
-      if (editId) await updateTestimoni(editId, form);
-      else await createTestimoni(form);
-      closeForm();
+      const result = editId
+        ? await updateTestimoni(editId, form)
+        : await createTestimoni(form);
+      if (result.error) {
+        setFormError(result.error);
+      } else {
+        closeForm();
+      }
+    });
+  };
+
+  const handleDelete = (id: string, name: string) => {
+    if (!confirm(`Hapus testimoni dari "${name}"?`)) return;
+    setActionError(null);
+    startTransition(async () => {
+      const result = await deleteTestimoni(id);
+      if (result.error) setActionError(result.error);
+    });
+  };
+
+  const handleToggle = (id: string, current: boolean) => {
+    setActionError(null);
+    startTransition(async () => {
+      const result = await toggleTestimoniPublished(id, !current);
+      if (result.error) setActionError(result.error);
     });
   };
 
@@ -57,6 +82,13 @@ export function TestimoniTable({ testimonials }: { testimonials: Testimoni[] }) 
           <Plus className="size-4" /> Tambah Testimoni
         </button>
       </div>
+
+      {/* Action error */}
+      {actionError && (
+        <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-2.5 text-sm text-destructive">
+          {actionError}
+        </div>
+      )}
 
       {showForm && (
         <div className="rounded-xl border border-primary/30 bg-card p-5 space-y-4">
@@ -98,6 +130,11 @@ export function TestimoniTable({ testimonials }: { testimonials: Testimoni[] }) 
                 onChange={(e) => f("is_published", e.target.checked)} className="accent-primary" />
               <label htmlFor="testi-pub" className="text-sm font-medium">Tampilkan di website</label>
             </div>
+            {formError && (
+              <div className="sm:col-span-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                {formError}
+              </div>
+            )}
             <div className="flex gap-3 sm:col-span-2">
               <button type="submit" disabled={isPending}
                 className="rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50">
@@ -137,7 +174,7 @@ export function TestimoniTable({ testimonials }: { testimonials: Testimoni[] }) 
                   {t.is_published ? "Tampil" : "Tersembunyi"}
                 </span>
                 <div className="flex items-center gap-1">
-                  <button onClick={() => startTransition(() => toggleTestimoniPublished(t.id, !t.is_published))}
+                  <button onClick={() => handleToggle(t.id, t.is_published)}
                     className="flex size-8 items-center justify-center rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
                     {t.is_published ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
                   </button>
@@ -145,7 +182,7 @@ export function TestimoniTable({ testimonials }: { testimonials: Testimoni[] }) 
                     className="flex size-8 items-center justify-center rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
                     <Pencil className="size-3.5" />
                   </button>
-                  <button onClick={() => { if (confirm(`Hapus testimoni dari "${t.customer_name}"?`)) startTransition(() => deleteTestimoni(t.id)); }}
+                  <button onClick={() => handleDelete(t.id, t.customer_name)}
                     className="flex size-8 items-center justify-center rounded-lg border border-border text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors">
                     <Trash2 className="size-3.5" />
                   </button>
