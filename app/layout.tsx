@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: `${SITE_URL}/og-default.jpg`,
+        url: `${SITE_URL}/api/og`,
         width: 1200,
         height: 630,
         alt: SITE_NAME,
@@ -78,7 +78,7 @@ const organizationJsonLd = {
   "@type": "Organization",
   name: SITE_NAME,
   url: SITE_URL,
-  logo: `${SITE_URL}/og-default.jpg`,
+  logo: `${SITE_URL}/api/og`,
   telephone: SITE_PHONE,
   address: {
     "@type": "PostalAddress",

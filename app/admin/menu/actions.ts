@@ -42,7 +42,7 @@ export async function createPackage(form: PackageFormData): Promise<ActionResult
   });
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/menu");
-  revalidatePath("/menu");
+  revalidatePath("/menu", "layout");
   return OK;
 }
 
@@ -66,7 +66,7 @@ export async function updatePackage(id: string, form: PackageFormData): Promise<
     .eq("id", id);
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/menu");
-  revalidatePath("/menu");
+  revalidatePath("/menu", "layout");
   return OK;
 }
 
@@ -74,7 +74,7 @@ export async function deletePackage(id: string): Promise<ActionResult> {
   const { error } = await db().from("packages").delete().eq("id", id);
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/menu");
-  revalidatePath("/menu");
+  revalidatePath("/menu", "layout");
   return OK;
 }
 
@@ -85,7 +85,7 @@ export async function saveVariants(packageId: string, variants: unknown[]): Prom
     .eq("id", packageId);
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/menu");
-  revalidatePath("/menu");
+  revalidatePath("/menu", "layout");
   return OK;
 }
 
@@ -96,6 +96,6 @@ export async function togglePackageActive(id: string, is_active: boolean): Promi
     .eq("id", id);
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/menu");
-  revalidatePath("/menu");
+  revalidatePath("/menu", "layout");
   return OK;
 }

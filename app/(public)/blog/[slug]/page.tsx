@@ -71,7 +71,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .select("*")
     .eq("slug", slug)
     .eq("is_published", true)
-    .single();
+    .maybeSingle();
 
   const post = data as BlogPost | null;
   if (!post) return { title: "Artikel tidak ditemukan" };

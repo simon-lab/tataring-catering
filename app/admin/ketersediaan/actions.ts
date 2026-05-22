@@ -14,7 +14,7 @@ export async function updateDefaultCapacity(capacity: number): Promise<ActionRes
     .upsert({ key: "default_slot_capacity", value: String(capacity) });
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/ketersediaan");
-  revalidatePath("/ketersediaan");
+  revalidatePath("/ketersediaan", "layout");
   return OK;
 }
 
@@ -43,7 +43,7 @@ export async function blockDate(date: string, reason: string): Promise<ActionRes
   }
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/ketersediaan");
-  revalidatePath("/ketersediaan");
+  revalidatePath("/ketersediaan", "layout");
   return OK;
 }
 
@@ -54,7 +54,7 @@ export async function unblockDate(date: string): Promise<ActionResult> {
     .eq("date", date);
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/ketersediaan");
-  revalidatePath("/ketersediaan");
+  revalidatePath("/ketersediaan", "layout");
   return OK;
 }
 
@@ -89,7 +89,7 @@ export async function updateBookedSlots(
   }
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/ketersediaan");
-  revalidatePath("/ketersediaan");
+  revalidatePath("/ketersediaan", "layout");
   return OK;
 }
 
@@ -118,6 +118,6 @@ export async function setCapacity(date: string, maxSlots: number): Promise<Actio
   }
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/ketersediaan");
-  revalidatePath("/ketersediaan");
+  revalidatePath("/ketersediaan", "layout");
   return OK;
 }

@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .select("*")
     .eq("slug", slug)
     .eq("is_published", true)
-    .single();
+    .maybeSingle();
 
   const story = data as MenuStory | null;
   if (!story) return { title: "Cerita tidak ditemukan" };
@@ -43,7 +43,7 @@ export default async function CeritaMenuDetailPage({ params }: PageProps) {
     .select("*")
     .eq("slug", slug)
     .eq("is_published", true)
-    .single();
+    .maybeSingle();
 
   const story = data as MenuStory | null;
   if (!story) notFound();

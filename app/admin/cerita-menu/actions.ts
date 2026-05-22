@@ -27,7 +27,7 @@ export async function createCerita(form: CeritaMenuFormData): Promise<ActionResu
   });
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/cerita-menu");
-  revalidatePath("/cerita-menu");
+  revalidatePath("/cerita-menu", "layout");
   return OK;
 }
 
@@ -45,7 +45,7 @@ export async function updateCerita(id: string, form: CeritaMenuFormData): Promis
     .eq("id", id);
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/cerita-menu");
-  revalidatePath("/cerita-menu");
+  revalidatePath("/cerita-menu", "layout");
   return OK;
 }
 
@@ -53,7 +53,7 @@ export async function deleteCerita(id: string): Promise<ActionResult> {
   const { error } = await db().from("menu_stories").delete().eq("id", id);
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/cerita-menu");
-  revalidatePath("/cerita-menu");
+  revalidatePath("/cerita-menu", "layout");
   return OK;
 }
 
@@ -61,6 +61,6 @@ export async function toggleCeritaPublished(id: string, is_published: boolean): 
   const { error } = await db().from("menu_stories").update({ is_published }).eq("id", id);
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/cerita-menu");
-  revalidatePath("/cerita-menu");
+  revalidatePath("/cerita-menu", "layout");
   return OK;
 }

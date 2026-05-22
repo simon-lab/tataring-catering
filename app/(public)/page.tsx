@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     title: `Catering Batak Bandung — ${SITE_NAME}`,
     description: SITE_TAGLINE,
     url: SITE_URL,
-    images: [{ url: `${SITE_URL}/og-home.jpg`, width: 1200, height: 630 }],
+    images: [{ url: `${SITE_URL}/api/og`, width: 1200, height: 630 }],
   },
   alternates: { canonical: SITE_URL },
 };
@@ -35,8 +35,8 @@ const localBusinessJsonLd = {
     "Catering Batak otentik di Bandung untuk acara adat, wedding Batak, arisan marga, dan perayaan.",
   url: SITE_URL,
   telephone: SITE_PHONE,
-  image: `${SITE_URL}/og-home.jpg`,
-  logo: `${SITE_URL}/og-default.jpg`,
+  image: `${SITE_URL}/api/og`,
+  logo: `${SITE_URL}/api/og`,
   priceRange: "$$",
   servesCuisine: ["Batak", "Indonesian"],
   areaServed: [

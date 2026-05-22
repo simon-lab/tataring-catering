@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .from("packages")
     .select("*")
     .eq("slug", slug)
-    .single();
+    .maybeSingle();
   const pkg = result.data as Package | null;
 
   if (!pkg) return { title: "Paket tidak ditemukan" };
@@ -45,7 +45,7 @@ export default async function MenuDetailPage({ params }: PageProps) {
   const supabase = await createClient();
 
   const [pkgResult, addonsResult] = await Promise.all([
-    supabase.from("packages").select("*").eq("slug", slug).single(),
+    supabase.from("packages").select("*").eq("slug", slug).maybeSingle(),
     supabase.from("addons").select("*").eq("is_active", true),
   ]);
   const pkg = pkgResult.data as Package | null;

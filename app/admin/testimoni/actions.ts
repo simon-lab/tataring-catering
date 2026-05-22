@@ -27,7 +27,7 @@ export async function createTestimoni(form: TestimoniFormData): Promise<ActionRe
   });
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/testimoni");
-  revalidatePath("/testimoni");
+  revalidatePath("/testimoni", "layout");
   return OK;
 }
 
@@ -45,7 +45,7 @@ export async function updateTestimoni(id: string, form: TestimoniFormData): Prom
     .eq("id", id);
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/testimoni");
-  revalidatePath("/testimoni");
+  revalidatePath("/testimoni", "layout");
   return OK;
 }
 
@@ -53,7 +53,7 @@ export async function deleteTestimoni(id: string): Promise<ActionResult> {
   const { error } = await db().from("testimonials").delete().eq("id", id);
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/testimoni");
-  revalidatePath("/testimoni");
+  revalidatePath("/testimoni", "layout");
   return OK;
 }
 
@@ -61,6 +61,6 @@ export async function toggleTestimoniPublished(id: string, is_published: boolean
   const { error } = await db().from("testimonials").update({ is_published }).eq("id", id);
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/testimoni");
-  revalidatePath("/testimoni");
+  revalidatePath("/testimoni", "layout");
   return OK;
 }

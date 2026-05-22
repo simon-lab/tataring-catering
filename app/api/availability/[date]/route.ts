@@ -30,7 +30,7 @@ export async function GET(
     .from("availability")
     .select("*")
     .eq("date", date)
-    .single();
+    .maybeSingle();
 
   const rec = data as Availability | null;
 

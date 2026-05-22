@@ -22,7 +22,7 @@ export async function addGalleryItem(
   });
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/galeri");
-  revalidatePath("/galeri");
+  revalidatePath("/galeri", "layout");
   return OK;
 }
 
@@ -30,7 +30,7 @@ export async function deleteGalleryItem(id: string): Promise<ActionResult> {
   const { error } = await db().from("gallery").delete().eq("id", id);
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/galeri");
-  revalidatePath("/galeri");
+  revalidatePath("/galeri", "layout");
   return OK;
 }
 
@@ -50,6 +50,6 @@ export async function updateGalleryItem(
     .eq("id", id);
   if (error) return { error: translateDbError(error.message) };
   revalidatePath("/admin/galeri");
-  revalidatePath("/galeri");
+  revalidatePath("/galeri", "layout");
   return OK;
 }
