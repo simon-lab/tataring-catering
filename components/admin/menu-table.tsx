@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useTransition, useRef } from "react";
-import { Plus, Pencil, Trash2, ToggleLeft, ToggleRight, Layers, ImagePlus, Loader2, X } from "lucide-react";
+import { useState, useTransition } from "react";
+import { Plus, Pencil, Trash2, ToggleLeft, ToggleRight, Layers, ImagePlus } from "lucide-react";
 import { cn, formatRupiah, slugify } from "@/lib/utils";
 import { PACKAGE_CATEGORIES } from "@/lib/constants";
-import { createClient } from "@/lib/supabase/client";
+import { MenuImageUploader } from "./menu-image-uploader";
 import {
   createPackage,
   updatePackage,
@@ -43,12 +43,6 @@ const EMPTY_FORM: PackageFormData = {
   contents: "", badge: "", images: [], is_active: true,
 };
 
-const MAX_IMAGES = 5;
-const MAX_SIZE_MB = 2;
-const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
-const ACCEPT_TYPES = ["image/jpeg", "image/png", "image/webp"];
-const ACCEPT_ATTR = ACCEPT_TYPES.join(",");
-
 function pkgToForm(p: Package): PackageFormData {
   return {
     name: p.name,
@@ -64,122 +58,6 @@ function pkgToForm(p: Package): PackageFormData {
   };
 }
 
-// ─── Image uploader ────────────────────────────────────────────────────────────
-
-interface ImageUploaderProps {
-  images: string[];
-  onChange: (urls: string[]) => void;
-}
-
-function MenuImageUploader({ images, onChange }: ImageUploaderProps) {
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    e.target.value = "";
-    setUploadError(null);
-
-    if (images.length >= MAX_IMAGES) {
-      setUploadError(`Maksimal ${MAX_IMAGES} foto per paket`);
-      return;
-    }
-    if (!ACCEPT_TYPES.includes(file.type)) {
-      setUploadError("Format tidak didukung. Gunakan JPG, PNG, atau WebP");
-      return;
-    }
-    if (file.size > MAX_SIZE_BYTES) {
-      setUploadError(
-        `Foto terlalu besar (${(file.size / 1024 / 1024).toFixed(1)}MB). Maksimal ${MAX_SIZE_MB}MB per foto`
-      );
-      return;
-    }
-
-    setUploading(true);
-    try {
-      const supabase = createClient();
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const path = `menu/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-
-      const { error: storageErr } = await supabase.storage
-        .from("tataring")
-        .upload(path, file, { upsert: false });
-
-      if (storageErr) {
-        if (storageErr.message.includes("Bucket not found") || storageErr.message.includes("not found")) {
-          throw new Error("Bucket 'tataring' belum dibuat di Supabase Storage");
-        }
-        throw new Error("Upload gagal: " + storageErr.message);
-      }
-
-      const { data } = supabase.storage.from("tataring").getPublicUrl(path);
-      onChange([...images, data.publicUrl]);
-    } catch (err) {
-      setUploadError(err instanceof Error ? err.message : "Upload gagal, coba lagi");
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const removeImage = (index: number) => {
-    onChange(images.filter((_, i) => i !== index));
-  };
-
-  return (
-    <div className="space-y-2">
-      <div className="flex flex-wrap gap-2">
-        {images.map((url, i) => (
-          <div key={url + i} className="relative size-20 overflow-hidden rounded-lg border border-border group flex-shrink-0">
-            <img src={url} alt="" className="h-full w-full object-cover" />
-            <button
-              type="button"
-              onClick={() => removeImage(i)}
-              className="absolute inset-0 flex items-center justify-center bg-black/55 opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <X className="size-4 text-white" />
-            </button>
-          </div>
-        ))}
-
-        {images.length < MAX_IMAGES && (
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading}
-            className="size-20 flex-shrink-0 rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center gap-1 text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-50"
-          >
-            {uploading
-              ? <Loader2 className="size-4 animate-spin" />
-              : <ImagePlus className="size-4" />}
-            <span className="text-[10px] font-medium leading-none">
-              {uploading ? "Upload..." : "Tambah"}
-            </span>
-          </button>
-        )}
-      </div>
-
-      <input
-        ref={fileRef}
-        type="file"
-        accept={ACCEPT_ATTR}
-        onChange={handleFile}
-        className="hidden"
-      />
-
-      {uploadError && (
-        <p className="text-xs text-destructive">{uploadError}</p>
-      )}
-
-      <p className="text-xs text-muted-foreground">
-        Maks. {MAX_IMAGES} foto · {MAX_SIZE_MB}MB per foto · JPG, PNG, WebP
-      </p>
-    </div>
-  );
-}
-
-// ─── Main table ────────────────────────────────────────────────────────────────
 
 function ErrorBanner({ message }: { message: string }) {
   return (
