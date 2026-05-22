@@ -7,7 +7,7 @@ import type { Package, Addon } from "@/types/database";
 export const metadata: Metadata = {
   title: `Pesan Catering — ${SITE_NAME}`,
   description:
-    "Pesan catering Batak TATARING untuk acara adat, wedding, arisan, birthday, dan kantor. Isi form pemesanan dan admin kami akan menghubungi kamu via WhatsApp.",
+    "Pesan catering Batak TATARING untuk acara adat, wedding, arisan, dan perayaan di Bandung. Isi form pemesanan dan admin kami akan menghubungi kamu via WhatsApp.",
 };
 
 interface PageProps {

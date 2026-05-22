@@ -20,8 +20,7 @@ export const EVENT_TYPES = [
   { value: "pesta_adat", label: "Pesta Adat" },
   { value: "wedding", label: "Wedding Batak" },
   { value: "arisan", label: "Arisan Marga" },
-  { value: "birthday", label: "Birthday" },
-  { value: "kantor", label: "Acara Kantor" },
+  { value: "perayaan", label: "Perayaan" },
   { value: "lainnya", label: "Lainnya" },
 ] as const;
 
@@ -29,8 +28,7 @@ export const PACKAGE_CATEGORIES = [
   { value: "pesta_adat", label: "Pesta Adat" },
   { value: "wedding", label: "Wedding Batak" },
   { value: "arisan", label: "Arisan Marga" },
-  { value: "birthday", label: "Birthday" },
-  { value: "kantor", label: "Acara Kantor" },
+  { value: "perayaan", label: "Perayaan" },
   { value: "custom", label: "Custom" },
 ] as const;
 

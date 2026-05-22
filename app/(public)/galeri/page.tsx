@@ -8,7 +8,7 @@ import type { GalleryItem } from "@/types/database";
 export const metadata: Metadata = {
   title: `Galeri Event — ${SITE_NAME}`,
   description:
-    "Lihat koleksi foto event catering TATARING — dari pesta adat, wedding Batak, arisan marga, hingga acara kantor. Ratusan momen spesial yang kami layani.",
+    "Lihat koleksi foto event catering TATARING Bandung — dari pesta adat, wedding Batak, arisan marga, hingga berbagai perayaan. Ratusan momen spesial yang kami layani.",
 };
 
 export default async function GaleriPage() {
@@ -32,7 +32,7 @@ export default async function GaleriPage() {
           <h1 className="mt-2 font-heading text-4xl text-foreground">Galeri</h1>
           <p className="mt-2 text-muted-foreground">
             Ratusan momen spesial yang kami layani — dari adat, wedding, arisan, hingga
-            hangout kantor.
+            berbagai perayaan di Bandung.
           </p>
         </div>
       </div>

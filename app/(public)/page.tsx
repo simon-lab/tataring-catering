@@ -16,7 +16,7 @@ import type { Package, MenuStory, Testimonial } from "@/types/database";
 export const metadata: Metadata = {
   title: `Catering Batak Bandung — ${SITE_NAME}`,
   description:
-    "Catering Batak otentik di Bandung untuk acara adat, wedding Batak, arisan marga, birthday, dan acara kantor. Saksang, Arsik, Na Niura — cita rasa asli. Horas! Mauliate.",
+    "Catering Batak otentik di Bandung untuk acara adat, wedding Batak, arisan marga, dan perayaan. Saksang, Arsik, Na Niura — cita rasa asli. Horas! Mauliate.",
   openGraph: {
     title: `Catering Batak Bandung — ${SITE_NAME}`,
     description: SITE_TAGLINE,
@@ -32,7 +32,7 @@ const localBusinessJsonLd = {
   "@id": `${SITE_URL}/#business`,
   name: SITE_NAME,
   description:
-    "Catering Batak otentik di Bandung untuk acara adat, wedding Batak, arisan marga, birthday, dan acara kantor.",
+    "Catering Batak otentik di Bandung untuk acara adat, wedding Batak, arisan marga, dan perayaan.",
   url: SITE_URL,
   telephone: SITE_PHONE,
   image: `${SITE_URL}/og-home.jpg`,

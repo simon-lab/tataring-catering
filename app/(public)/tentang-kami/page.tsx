@@ -95,8 +95,8 @@ export default function TentangKamiPage() {
                 Kini berbasis di <strong className="text-foreground">Bandung</strong>, dengan
                 ratusan event sukses dan kepercayaan ribuan keluarga, kami terus berkomitmen
                 untuk menghadirkan cita rasa Batak yang otentik di setiap momen spesialmu —
-                dari pesta adat, wedding Batak, arisan marga, hingga hangout kantor di seluruh
-                area Bandung dan sekitarnya.
+                dari pesta adat, wedding Batak, arisan marga, hingga berbagai perayaan spesial
+                di seluruh area Bandung dan sekitarnya.
               </p>
             </div>
             <Link

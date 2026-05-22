@@ -55,7 +55,7 @@ export default async function MenuPage({ searchParams }: PageProps) {
             Paket Catering Batak Bandung
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Dari pesta adat hingga hangout kantor — ada paket yang pas buat semua acara di Bandung.
+            Dari pesta adat, wedding, arisan, hingga perayaan — ada paket yang pas buat semua acara di Bandung.
           </p>
         </div>
       </div>

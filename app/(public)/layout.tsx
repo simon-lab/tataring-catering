@@ -1,21 +1,39 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { LanguageProvider } from "@/lib/i18n/context";
-import { SITE_NAME, SITE_TAGLINE, SITE_URL, WHATSAPP_NUMBER } from "@/lib/constants";
+import {
+  SITE_NAME, SITE_TAGLINE, SITE_URL, WHATSAPP_NUMBER,
+  SITE_CITY, SITE_PROVINCE, SITE_STREET_ADDRESS, SITE_POSTAL_CODE,
+  SITE_GEO_LAT, SITE_GEO_LNG, SITE_PHONE,
+} from "@/lib/constants";
 
-// Schema.org LocalBusiness + Restaurant — sitewide untuk halaman publik
+// Schema.org LocalBusiness — sitewide untuk halaman publik
 const businessJsonLd = {
   "@context": "https://schema.org",
-  "@type": ["Restaurant", "FoodEstablishment", "LocalBusiness"],
+  "@type": ["FoodEstablishment", "LocalBusiness"],
   name: SITE_NAME,
-  description: `${SITE_TAGLINE} Catering Batak otentik untuk acara adat, wedding, arisan marga, birthday, dan acara kantor di Medan.`,
+  description: `${SITE_TAGLINE} Catering Batak otentik untuk acara adat, wedding, arisan marga, dan perayaan di Bandung.`,
   url: SITE_URL,
-  telephone: WHATSAPP_NUMBER ? `+${WHATSAPP_NUMBER}` : undefined,
+  telephone: SITE_PHONE,
   servesCuisine: ["Batak", "Indonesian"],
   priceRange: "$$",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: SITE_STREET_ADDRESS,
+    addressLocality: SITE_CITY,
+    addressRegion: SITE_PROVINCE,
+    postalCode: SITE_POSTAL_CODE,
+    addressCountry: "ID",
+  },
+  geo: {
+    "@type": "GeoCoordinates",
+    latitude: SITE_GEO_LAT,
+    longitude: SITE_GEO_LNG,
+  },
   areaServed: [
-    { "@type": "City", name: "Medan" },
-    { "@type": "State", name: "Sumatera Utara" },
+    { "@type": "City", name: "Bandung" },
+    { "@type": "City", name: "Cimahi" },
+    { "@type": "AdministrativeArea", name: "Bandung Barat" },
   ],
   openingHoursSpecification: [
     {

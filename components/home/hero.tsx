@@ -33,8 +33,7 @@ export function Hero() {
           {/* Sub-headline */}
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-primary-foreground/75">
             Catering Batak otentik untuk acara adat, wedding, arisan marga,
-            birthday, sampai hangout tim kantor. Tepat waktu, porsi pas, rasa
-            autentik.
+            dan perayaan spesialmu. Tepat waktu, porsi pas, rasa autentik.
           </p>
 
           {/* CTAs */}

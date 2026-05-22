@@ -11,8 +11,7 @@ const EVENT_TO_CATEGORY: Record<string, string | null> = {
   pesta_adat: "pesta_adat",
   wedding:    "wedding",
   arisan:     "arisan",
-  birthday:   "birthday",
-  kantor:     "kantor",
+  perayaan:   "perayaan",
   lainnya:    null,
 };
 
